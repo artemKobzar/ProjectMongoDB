@@ -1,21 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using ProjectMongoDB.Entities;
 using ProjectMongoDB.Repositories;
+using ProjectMongoDB.Services;
 using System.Xml.Linq;
 
 namespace ProjectMongoDB.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserImageRepository _userImageRepository;
-        public UserController(IUserRepository userRepository, IUserImageRepository userImageRepository)
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ITokenService _tokenService;
+        public UserController(IUserRepository userRepository, IUserImageRepository userImageRepository, IHttpClientFactory httpClientFactory)
         {
             _userRepository = userRepository;
             _userImageRepository = userImageRepository;
+            _httpClientFactory = httpClientFactory;
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -82,6 +89,17 @@ namespace ProjectMongoDB.Controllers
         [Route("/UserWithPassport", Name = "UP")]
         public async Task<IActionResult> GetAllWithPassport(string? firstName, string? lastName, string? nation, string? gender)
         {
+            //var authClient = _httpClientFactory.CreateClient();
+            //var discoveryDocument = await authClient.GetDiscoveryDocumentAsync("https://localhost:7255");
+            //var token = await authClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+            //{
+            //    Address = discoveryDocument.TokenEndpoint,
+            //    ClientId = "project-test-api",
+            //    ClientSecret = "secret"
+            //});
+            //var userClient = _httpClientFactory.CreateClient();
+            //userClient.SetBearerToken(token.AccessToken);
+
             var users = await _userRepository.GetAllUserWithPassport(firstName, lastName, nation, gender);
             return Ok(users);
         }
