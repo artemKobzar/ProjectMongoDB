@@ -52,7 +52,16 @@ namespace ProjectMongoDB.Repositories
         public byte[] DownloadImage(string name)
         {
             var image = _gridFSBucket.DownloadAsBytesByName(name);
+
             return image;
         }
+        //public async Task<byte[]> GetImage(string id)
+        //{
+        //    var image = await _userImageCollection.FindAsync(im => im.Id == id);
+        //    if(image != null)
+        //    {
+        //        return Convert.;
+        //    }
+        //}
     }
 }

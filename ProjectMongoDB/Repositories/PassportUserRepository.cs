@@ -50,6 +50,9 @@ namespace ProjectMongoDB.Repositories
             }
             FilterDefinition<PassportUser> filter = filterBuilder.Eq(existingPassportUser => existingPassportUser.Id, passportUser.Id);
             await _passportUserCollection.ReplaceOneAsync(filter, passportUser);
+            FilterDefinition<User> filterUser = filterBuilderU.Eq(u => u.Id, passportUser.UserId);
+            var update = Builders<User>.Update.Set(u => u.Passport, passportUser);
+            await _userCollection.UpdateOneAsync(filterUser, update);
         }
 
         public async Task Delete(string id)

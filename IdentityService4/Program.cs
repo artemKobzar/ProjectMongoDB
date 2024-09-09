@@ -14,15 +14,8 @@ namespace IdentityService4
     {
         public static void Main(string[] args)
         {
-            //var seed = args.Contains("/seed");
-
             var builder = WebApplication.CreateBuilder(args);
-            //SeedData.EnsureSeedData(builder.Configuration.GetConnectionString("SQLDbConnectionIdentity4"));
-            //if (seed)
-            //{
-            //    args = args.Except(new[] { "/seed" }).ToArray();
 
-            //}
             ConfigurationManager configuration = builder.Configuration;
             // Add services to the container.
             builder.Services.ConfigureIdentityServices(builder.Configuration);
@@ -64,3 +57,10 @@ namespace IdentityService4
         }
     }
 }
+//var seed = args.Contains("/seed");
+//SeedData.EnsureSeedData(builder.Configuration.GetConnectionString("SQLDbConnectionIdentity4"));
+//if (seed)
+//{
+//    args = args.Except(new[] { "/seed" }).ToArray();
+
+//}

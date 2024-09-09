@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using ProjectMongoDB.Entities;
 using ProjectMongoDB.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ProjectMongoDB.Controllers
 {
@@ -33,14 +34,16 @@ namespace ProjectMongoDB.Controllers
             return Ok(paspportUser);
         }
 
-        [HttpPost]
+        [HttpPost("/AddPassport")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add([FromBody] PassportUser passportUser)
         {
             await _passportUserRepository.Add(passportUser);
             return Ok("User has been created");
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("/updatePassport/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string id, [FromBody] PassportUser updatedPassportUser)
         {
             var passportUser = _passportUserRepository.Get(id);

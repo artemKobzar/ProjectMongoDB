@@ -1,0 +1,32 @@
+﻿@page "/userDetail/{Id}"
+@attribute [Authorize]
+
+<h3>User's info</h3>
+
+<div class="row">
+    @if (SelectedUser != null)
+    {
+        <div class="col-6 col-sm-12 col-md-6 col-lg-4 col-xl-4 mh-25 mb-4">
+            <div class="card shadow-sm rounded">
+                <div class="card-body">
+@*                     <p> <img src="/Images/cute-cartoon-rubber-duck-vector-600nw-2276837591.jpg" style="width:200px;height:200px; float: right" /></p> *@
+                    <p> <img src="data:image/jpg;base64,@base64Image" style="width:200px;height:200px; float: right" /></p>
+                    <h4 class="card-title"><b>@SelectedUser.FirstName</b></h4>
+                    <h4 class="card-title"><b>@SelectedUser.LastName</b></h4>
+                    <p class="card-text"><b>Address: </b>@SelectedUser.Address</p>
+                    <p class="card-text"><b>Phone number: </b>@SelectedUser.PhoneNumber</p>
+                    <p class="card-text"><b>Gender: </b>@SelectedPassportUser.Gender</p>
+                    <p class="card-text"><b>Nationality: </b>@SelectedPassportUser.Nationality</p>
+                    <p class="card-text"><b>Passport valid date: </b>@SelectedPassportUser.ValidDate</p>
+                </div>
+                <div class="card-footer text-muted">
+                    <span><b>E-mail: </b>@SelectedUser.Email</span>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>No user available</p>
+    }
+</div>

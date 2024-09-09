@@ -62,8 +62,15 @@ namespace ProjectMongoDB.Repositories
             {
                 throw new ArgumentNullException(nameof(user));
             }
-            FilterDefinition<User> filter = filterBuilder.Eq(existingUser =>  existingUser.Id, user.Id);
+            FilterDefinition<User> filter = filterBuilder.Eq(existingUser => existingUser.Id, user.Id);
             await _userCollection.ReplaceOneAsync(filter, user);
+            //if (user.Passport != null)
+            //{
+            //    FilterDefinition<PassportUser> filterPassport = filterBuilder1.Eq(p => p.UserId, user.Id);
+            //    var update = Builders<PassportUser>.Update;
+            //    await _passportUserCollection.UpdateOneAsync(filterPassport);
+            //}
+
         }
 
         public async Task Delete(string id)

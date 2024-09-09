@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using ProjectMongoDB.Entities;
 
 namespace ProjectMongoDB.Repositories
 {

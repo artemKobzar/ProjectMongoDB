@@ -1,47 +1,50 @@
 ﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using ProjectMongoDB.Entities;
 using ProjectMongoDB.Repositories;
 using ProjectMongoDB.Services;
+using System.IdentityModel.Tokens.Jwt;
 using System.Xml.Linq;
 
 namespace ProjectMongoDB.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserImageRepository _userImageRepository;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ITokenService _tokenService;
-        public UserController(IUserRepository userRepository, IUserImageRepository userImageRepository, IHttpClientFactory httpClientFactory)
+
+        public UserController(IUserRepository userRepository, IUserImageRepository userImageRepository)
         {
             _userRepository = userRepository;
             _userImageRepository = userImageRepository;
-            _httpClientFactory = httpClientFactory;
         }
-        [HttpGet]
+        [HttpGet("/users")]
+        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetAll()
         {
-            var users = await _userRepository.GetAll();
-            return Ok(users);
+                var users = await _userRepository.GetAll();
+                return Ok(users);          
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
             var user = await _userRepository.Get(id);
-            if (user == null) 
+            if (user == null)
             {
                 return NotFound();
             }
             return Ok(user);
         }
         [HttpGet("/UserWithPassport/{id}")]
+        //[Authorize]
         public async Task<IActionResult> GetUserWithPassport(string id)
         {
             var user = await _userRepository.GetUserWithPassport(id);
@@ -53,14 +56,16 @@ namespace ProjectMongoDB.Controllers
             return Ok(user);
         }
 
-        [HttpPost]
+        [HttpPost("/AddUser")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add([FromBody] User user)
         {
             await _userRepository.Add(user);
             return Ok("User has been created");
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("/updateUser/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string id, [FromBody] User updatedUser)
         {
             var user = _userRepository.Get(id);
@@ -68,7 +73,7 @@ namespace ProjectMongoDB.Controllers
             {
                 return NotFound();
             }
-            await _userRepository.Update(id,updatedUser);
+            await _userRepository.Update(id, updatedUser);
 
             return Ok("User has been updated");
         }
@@ -87,19 +92,9 @@ namespace ProjectMongoDB.Controllers
 
         [HttpGet]
         [Route("/UserWithPassport", Name = "UP")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllWithPassport(string? firstName, string? lastName, string? nation, string? gender)
         {
-            //var authClient = _httpClientFactory.CreateClient();
-            //var discoveryDocument = await authClient.GetDiscoveryDocumentAsync("https://localhost:7255");
-            //var token = await authClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
-            //{
-            //    Address = discoveryDocument.TokenEndpoint,
-            //    ClientId = "project-test-api",
-            //    ClientSecret = "secret"
-            //});
-            //var userClient = _httpClientFactory.CreateClient();
-            //userClient.SetBearerToken(token.AccessToken);
-
             var users = await _userRepository.GetAllUserWithPassport(firstName, lastName, nation, gender);
             return Ok(users);
         }
@@ -129,6 +124,5 @@ namespace ProjectMongoDB.Controllers
 
             return File(image, "application/octet-stream", nameFormat);
         }
-
     }
 }

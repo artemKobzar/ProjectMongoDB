@@ -9,6 +9,8 @@ using Microsoft.OpenApi.Models;
 using Amazon.Runtime.Internal.Transform;
 using ProjectMongoDB.Services;
 using ProjectMongoDB;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,47 +27,12 @@ builder.Services.AddSwaggerGen(options =>
         Title = "Swagger IdentityServer4",
         Version = "1.0.0",
     });
-    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.OAuth2,
-        Flows = new OpenApiOAuthFlows
-        {
-            AuthorizationCode = new OpenApiOAuthFlow
-            {
-                AuthorizationUrl = new Uri("https://localhost:7255/connect/authorize"),
-                TokenUrl = new Uri("https://localhost:7255/connect/token"),
-                Scopes = new Dictionary<string, string>
-                {
-                    {"ProjectMongoDB", "Web API" }
-                }
-            }
-        }
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "oath2"
-                },
-                Scheme = "oath2",
-                Name = "Bearer",
-                In = ParameterLocation.Header
-            },
-            new List<string>()
-        }
-    });
-    options.OperationFilter<AuthorizeCheckOperationFilter>();
 });
+
 builder.Services.Configure<DbSettings>( builder.Configuration.GetSection("MyDb"));
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IPassportUserRepository, PassportUserRepository>();
 builder.Services.AddTransient<IUserImageRepository, UserImageRepository>();
-builder.Services.Configure<IdentityServerSettings>(builder.Configuration.GetSection("IdentityServerSettings"));
-builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddCors(options =>
 {
@@ -77,14 +44,20 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddAuthentication("Bearer")
-    .AddIdentityServerAuthentication("Bearer", options =>
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
     {
-        options.ApiName = "ProjectMongoDB";
-        options.Authority = "https://localhost:7255";
-        options.RequireHttpsMetadata = false;
+        options.Authority = "https://localhost:7353";
+        options.TokenValidationParameters.ValidateAudience = false;
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ApiScope", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("scope", "ProjectMongoDB");
+    });
+});
 
 var app = builder.Build();
 
@@ -101,13 +74,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger UI");
-        options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
-        options.OAuthClientId("project-test-api");
-        options.OAuthClientSecret("secret");
-        options.OAuthUsePkce();
+        //options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+        //options.OAuthClientId("project-test-api");
+        //options.OAuthClientSecret("secret");
+        //options.OAuthUsePkce();
     });
 }
 
+app.MapControllers();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
@@ -128,3 +102,55 @@ app.Run();
 //    });
 //app.UseHttpsRedirection();
 //app.MapControllers();
+
+//builder.Services.AddAuthentication("Bearer")
+//    .AddIdentityServerAuthentication("Bearer", options =>
+//    {
+//        options.ApiName = "ProjectMongoDB";
+//        options.Authority = "https://localhost:7353";
+//        options.RequireHttpsMetadata = false;
+
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateAudience = false,
+//            NameClaimType = "name",
+//            RoleClaimType = "role"
+//        };
+//    });
+
+// Swagger options to configure Authorization Code
+//options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+//{
+//    Type = SecuritySchemeType.OAuth2,
+//    Flows = new OpenApiOAuthFlows
+//    {
+//        AuthorizationCode = new OpenApiOAuthFlow
+//        {
+//            AuthorizationUrl = new Uri("https://localhost:7255/connect/authorize"),
+//            TokenUrl = new Uri("https://localhost:7255/connect/token"),
+//            Scopes = new Dictionary<string, string>
+//                {
+//                    {"ProjectMongoDB", "Web API" }
+//                }
+//        }
+//    }
+//});
+//    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+//    {
+//        {
+//            new OpenApiSecurityScheme
+//            {
+//                Reference = new OpenApiReference
+//                {
+//                    Type = ReferenceType.SecurityScheme,
+//                    Id = "oath2"
+//                },
+//                Scheme = "oath2",
+//                Name = "Bearer",
+//                In = ParameterLocation.Header
+//            },
+//            new List<string>()
+//        }
+//    });
+//    options.OperationFilter<AuthorizeCheckOperationFilter>();
+//});

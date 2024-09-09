@@ -1,0 +1,33 @@
+﻿@page "/users"
+@attribute [Authorize]
+
+<h3>Users</h3>
+
+<div class="row">
+    @if (Users1.Any())
+    {
+        @foreach (var user in Users1)
+        {
+            <div class="col-6 col-sm-12 col-md-6 col-lg-4 col-xl-4 mh-25 mb-4">
+                <div class="card shadow-sm rounded">
+                    <div class="card-body">
+                        <h5 class="card-title"><b>@user.FirstName</b></h5>
+                        <h5 class="card-title"><b>@user.LastName</b></h5>
+                        <p class="card-text">@user.Address</p>
+                        <p class="card-text">@user.PhoneNumber</p>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <span>E-mail: @user.Email</span>
+                    </div>
+                    <div>
+                        <a href="/UserWithPassport" @onclick="() => GetUser(user.Id)">Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No users available</p>
+    }
+</div>
