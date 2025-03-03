@@ -26,7 +26,6 @@ namespace ProjectMongoDB.Controllers
         }
         [HttpGet("/users")]
         [Authorize]
-        //[Authorize]
         public async Task<IActionResult> GetAll()
         {
                 var users = await _userRepository.GetAll();
@@ -44,7 +43,7 @@ namespace ProjectMongoDB.Controllers
             return Ok(user);
         }
         [HttpGet("/UserWithPassport/{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetUserWithPassport(string id)
         {
             var user = await _userRepository.GetUserWithPassport(id);
@@ -79,6 +78,7 @@ namespace ProjectMongoDB.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
             var user = _userRepository.Get(id);
@@ -93,9 +93,10 @@ namespace ProjectMongoDB.Controllers
         [HttpGet]
         [Route("/UserWithPassport", Name = "UP")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllWithPassport(string? firstName, string? lastName, string? nation, string? gender)
+        [Authorize]
+        public async Task<IActionResult> GetAllWithPassport(string? firstName, string? lastName, string? nationality, string? gender)
         {
-            var users = await _userRepository.GetAllUserWithPassport(firstName, lastName, nation, gender);
+            var users = await _userRepository.GetAllUserWithPassport(firstName, lastName, nationality, gender);
             return Ok(users);
         }
 

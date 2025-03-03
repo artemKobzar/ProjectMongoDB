@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DuendeIdentity", "DuendeIde
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientMongo", "ClientMongo\ClientMongo.csproj", "{56E61C88-E20C-4F62-816D-243B1B84F2ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectMongoDB.IntegrationTests", "ProjectMongoDB.IntegrationTests\ProjectMongoDB.IntegrationTests.csproj", "{FE09F5C1-4489-4519-9B50-ACB0F33D9927}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{56E61C88-E20C-4F62-816D-243B1B84F2ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56E61C88-E20C-4F62-816D-243B1B84F2ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56E61C88-E20C-4F62-816D-243B1B84F2ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE09F5C1-4489-4519-9B50-ACB0F33D9927}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE09F5C1-4489-4519-9B50-ACB0F33D9927}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE09F5C1-4489-4519-9B50-ACB0F33D9927}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE09F5C1-4489-4519-9B50-ACB0F33D9927}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -24,6 +24,7 @@ namespace ClientMongo
             builder.Services.AddHttpClient();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<UserGettingClaimsService>();
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             builder.Services.AddAuthentication(options =>
                 {
@@ -52,7 +53,7 @@ namespace ClientMongo
                     options.TokenValidationParameters.NameClaimType = "name";
                     options.GetClaimsFromUserInfoEndpoint = true;
                     options.RequireHttpsMetadata = false;
-
+                    
                     options.ResponseType = "code";
                     options.UsePkce = true;
                     options.SaveTokens = true;

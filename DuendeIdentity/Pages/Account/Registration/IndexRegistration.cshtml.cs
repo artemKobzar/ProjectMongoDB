@@ -72,23 +72,15 @@ namespace DuendeIdentity.Pages.Account.Registration
                             new Claim(JwtClaimTypes.Email,Input.Email)
                         });
 
-                        var loginresult = await _signInManager.PasswordSignInAsync(
-                            Input.Email, Input.Password, false, lockoutOnFailure: true);
+                        await _signInManager.SignInAsync(user, isPersistent: false);
 
-                        if (loginresult.Succeeded)
+                        // Debugging: Check if user is authenticated
+                        Console.WriteLine($"User is authenticated: {User.Identity.IsAuthenticated}");
+
+                        // Ensure returnUrl is valid before redirecting
+                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         {
-                            if (Url.IsLocalUrl(Input.ReturnUrl))
-                            {
-                                return Redirect(Input.ReturnUrl);
-                            }
-                            if (string.IsNullOrEmpty(Input.ReturnUrl))
-                            {
-                                return Redirect("~/");
-                            }
-                            else
-                            {
-                                throw new Exception("invalid return URL");
-                            }
+                            return Redirect(returnUrl);
                         }
                     }
                 }
@@ -97,3 +89,17 @@ namespace DuendeIdentity.Pages.Account.Registration
         }
     }
 }
+//var loginresult = await _signInManager.PasswordSignInAsync(
+//    Input.Email, Input.Password, false, lockoutOnFailure: true);
+//if (Url.IsLocalUrl(Input.ReturnUrl))
+//{
+//return Redirect(Input.ReturnUrl);
+//}
+//if (string.IsNullOrEmpty(Input.ReturnUrl))
+//{
+//    return Redirect("~/");
+//}
+//else
+//{
+//    throw new Exception("invalid return URL");
+//}

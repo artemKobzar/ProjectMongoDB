@@ -29,7 +29,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.Configure<DbSettings>( builder.Configuration.GetSection("MyDb"));
+builder.Services.Configure<DbSettings>(builder.Configuration.GetSection("MyDb"));
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IPassportUserRepository, PassportUserRepository>();
 builder.Services.AddTransient<IUserImageRepository, UserImageRepository>();
@@ -61,6 +61,7 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowAll");
@@ -87,6 +88,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
 });
 app.Run();
+public partial class Program { }
 
 //builder.Services.AddAuthentication(options =>
 //    {

@@ -16,7 +16,8 @@ namespace ProjectMongoDB.Repositories
         private readonly IMongoCollection<UserImage> _userImageCollection;
         private readonly IOptions<DbSettings> _dbSettings;
         private readonly FilterDefinitionBuilder<UserImage> filterBuilder = Builders<UserImage>.Filter;
-        private readonly FilterDefinitionBuilder<PassportUser> filterBuilderP = Builders<PassportUser>.Filter;
+        private readonly FilterDefinitionBuilder<PassportUser> filterBuilderPassport = Builders<PassportUser>.Filter;
+        private readonly FilterDefinitionBuilder<UserImage> filterBuilderImage = Builders<UserImage>.Filter;
         public UserImageRepository(IOptions<DbSettings> dbSettings)
         {
             _dbSettings = dbSettings;
@@ -43,7 +44,7 @@ namespace ProjectMongoDB.Repositories
 
             await _userImageCollection.InsertOneAsync(image);
 
-            FilterDefinition<PassportUser> filterP = filterBuilderP.Eq(p => p.Id, image.PassportUserId);
+            FilterDefinition<PassportUser> filterP = filterBuilderPassport.Eq(p => p.Id, image.PassportUserId);
             var update = Builders<PassportUser>.Update.Set(p => p.Image, image);
             await _passportUserCollection.UpdateOneAsync(filterP, update);
 
@@ -55,13 +56,18 @@ namespace ProjectMongoDB.Repositories
 
             return image;
         }
-        //public async Task<byte[]> GetImage(string id)
-        //{
-        //    var image = await _userImageCollection.FindAsync(im => im.Id == id);
-        //    if(image != null)
-        //    {
-        //        return Convert.;
-        //    }
-        //}
+        public async Task DeleteImage(string id)
+        {
+            FilterDefinition<UserImage> filterImage = filterBuilderImage.Eq(entity => entity.Id, id);
+            await _userImageCollection.DeleteOneAsync(filterImage);
+        }
     }
 }
+//FilterDefinition<PassportUser> filter = filterBuilderPassport.Eq(entity => entity.Id, id);
+//var passport = await _passportUserCollection.Find(filter).FirstOrDefaultAsync();
+//if (passport.Image != null)
+//{
+//    var image = passport.Image;
+//    FilterDefinition<UserImage> filterImage = filterBuilderImage.Eq(entity => entity.Id, image.Id);
+//    await _userImageCollection.DeleteOneAsync(filterImage);
+//}

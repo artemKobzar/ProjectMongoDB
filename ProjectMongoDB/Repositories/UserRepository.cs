@@ -20,7 +20,7 @@ namespace ProjectMongoDB.Repositories
         private readonly IMongoCollection<UserImage> _userImageCollection;
         private readonly IOptions<DbSettings> _dbSettings;
         private readonly FilterDefinitionBuilder<User> filterBuilder = Builders<User>.Filter;
-        private readonly FilterDefinitionBuilder<PassportUser> filterBuilder1 = Builders<PassportUser>.Filter;
+        private readonly FilterDefinitionBuilder<PassportUser> filterBuilderPas = Builders<PassportUser>.Filter;
         public UserRepository (IOptions<DbSettings> dbSettings)
         {
             _dbSettings = dbSettings;
@@ -86,7 +86,6 @@ namespace ProjectMongoDB.Repositories
 
         public async Task<IEnumerable<User>> GetAllUserWithPassport(string? firstName, string? lastName, string? nationality, string? gender)
         {
-            //var filter1 = Builders<User>.Filter.Where(u => u.Passport.Nationality == nationality);
             var filter = filterBuilder.Empty;
 
             if (!string.IsNullOrEmpty(firstName))
@@ -97,27 +96,33 @@ namespace ProjectMongoDB.Repositories
             {
                 filter &= filterBuilder.Regex(u => u.LastName, new BsonRegularExpression(lastName, "i"));
             }
-            if (!string.IsNullOrEmpty(nationality))
-            {
-                filter = filterBuilder.Regex(u => u.Passport.Nationality, new BsonRegularExpression(nationality, "i"));
-            }
-            if (!string.IsNullOrEmpty(gender))
-            {
-                filter &= filterBuilder.Regex(u => u.Passport.Gender, new Regex(gender, RegexOptions.IgnoreCase));
-            }
+
             var users = await _userCollection.Find(filter).ToListAsync();
+            var filteredUsers = new List<User>();
+
             foreach (var user in users)
             {
-                var passportUser = await _passportUserCollection.Find(u => u.UserId == user.Id ).FirstOrDefaultAsync();
+                var passportFilter = Builders<PassportUser>.Filter.Eq(p => p.UserId, user.Id);
+                if (!string.IsNullOrEmpty(nationality))
+                {
+                    passportFilter &= Builders<PassportUser>.Filter.Regex(p => p.Nationality, new Regex(nationality, RegexOptions.IgnoreCase));
+                }
+                if (!string.IsNullOrEmpty(gender))
+                {
+                    passportFilter &= Builders<PassportUser>.Filter.Regex(p => p.Gender, new BsonRegularExpression($"^{gender}$", "i"));
+                }
+                var passportUser = await _passportUserCollection.Find(passportFilter).FirstOrDefaultAsync();
                 if (passportUser != null)
                 {
                     user.Passport = passportUser;
 
                     var userImage = await _userImageCollection.Find(u => u.PassportUserId == passportUser.Id).FirstOrDefaultAsync();
                     passportUser.Image = userImage;
+                    
+                    filteredUsers.Add(user);
                 }
             }
-            return users;
+            return filteredUsers;
         }
 
         public async Task<IEnumerable<User>> GetUserWithPassport(string id)
@@ -152,32 +157,35 @@ namespace ProjectMongoDB.Repositories
                     user.Passport = passportUser;
 
                     var userImage = await _userImageCollection.Find(u => u.PassportUserId == passportUser.Id).FirstOrDefaultAsync();
-                    passportUser.Image = userImage;
+                    if (userImage != null)
+                    {
+                        passportUser.Image = userImage;
+
+                    }
+                    else
+                    {
+                        passportUser.Image = new UserImage
+                        {
+                            Name = "default.png",
+                            //ImageType = ".png",
+                            PassportUserId = passportUser.Id
+                        };
+                    }
                 }
             }
             var userId = users.Find(u => u.Id == id);
-            var image = _gridFSBucket.DownloadAsBytesByName(userId.Passport.Image.Name);
+            if (userId?.Passport?.Image?.Name == "default.png")
+            {
+                var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "default.png");
+
+                userId.Passport.Image.Name = defaultImagePath; // Reference the local path for default image
+            }
+            else
+            {
+                var image = _gridFSBucket.DownloadAsBytesByName(userId.Passport.Image.Name);
+            }
+
             return userId;
         }
     }
 }
-//{
-//    var searchFilter = filterBuilder.Or(
-//        filterBuilder.Regex(u => u.FirstName, new BsonRegularExpression(searchTerm, "i")),
-//        filterBuilder.Regex(u => u.LastName, new BsonRegularExpression(searchTerm, "i"))
-//        );
-//    filter &= searchFilter;
-//}
-//if (!string.IsNullOrEmpty(searchTerm))
-//{
-//    filter &= filterBuilder.Where(u => u.FirstName.ToLower().Contains(searchTerm)
-//    || u.LastName.ToLower().Contains(searchTerm));
-//}
-//if (!string.IsNullOrEmpty(searchTerm))
-
-
-//if (user.Passport != null)
-//{
-//    user.Passport.UserId = user.Id;
-//    await _passportUserCollection.InsertOneAsync(user.Passport);
-//}

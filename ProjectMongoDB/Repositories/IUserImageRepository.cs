@@ -7,5 +7,6 @@ namespace ProjectMongoDB.Repositories
     {
         public Task<ObjectId> UploadImage(Stream fileStream, string fileName, string passportId);
         public byte[] DownloadImage(string name);
+        public Task DeleteImage(string id);
     }
 }

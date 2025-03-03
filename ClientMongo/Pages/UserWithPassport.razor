@@ -1,5 +1,7 @@
 ﻿@page "/UserWithPassport"
+@* @attribute [Authorize(Roles = "Admin")] *@
 @attribute [Authorize]
+@inject IJSRuntime JSRuntime
 
 <h3>User&Passport</h3>
 
@@ -30,7 +32,14 @@
         </div>
     </div>
 </div>
-<p </p>
+<p></p>
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
 <div class="row">
     @if (UsersWithPassport.Any())
     {
@@ -49,6 +58,7 @@
                     <div class="card-footer text-muted">
                         <p> Nationality: @user.Passport.Nationality</p>
                         <button class="btn btn-primary" @onclick="@(() => EditUser(user.Id))">Edit</button>
+                        <button class="btn btn-danger" @onclick="@(() => DeleteUser(user.Id))">Delete</button>
                     </div>
                     <button class="btn btn-secondary" @onclick="AddUser">Add user</button>
                 </div>

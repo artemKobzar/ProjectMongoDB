@@ -14,38 +14,60 @@ else
     <PageTitle>Edit "@CurrentUser.FirstName" </PageTitle>
     <h3>Edit "@CurrentUser.FirstName @CurrentUser.LastName"</h3>  
 }
-<EditForm Model="CurrentUser" OnSubmit="HandleSubmit">
+<EditForm Model="CurrentUser" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator/>
     <div>
         <label for="firstName">First name</label>
         <InputText id="firstName" @bind-Value="CurrentUser.FirstName" class="form-control"></InputText>
+        <ValidationMessage For="@(() => CurrentUser.FirstName)" />
     </div>
     <div>
         <label for="lastName">Last name</label>
         <InputText id="lastName" @bind-Value="CurrentUser.LastName" class="form-control"></InputText>
+        <ValidationMessage For="@(() => CurrentUser.LastName)" />
     </div>
     <div>
         <label for="phoneNumber">Phone number</label>
         <InputText id="phoneNumber" @bind-Value="CurrentUser.PhoneNumber" class="form-control"></InputText>
+        <ValidationMessage For="@(() => CurrentUser.PhoneNumber)" />
     </div>
     <div>
         <label for="address">Address</label>
         <InputText id="address" @bind-Value="CurrentUser.Address" class="form-control"></InputText>
+        <ValidationMessage For="@(() => CurrentUser.Address)" />
     </div>
     <div>
         <label for="email">E-mail</label>
         <InputText id="email" @bind-Value="CurrentUser.Email" class="form-control"></InputText>
+        <ValidationMessage For="@(() => CurrentUser.Email)" />
     </div>
     <div>
         <label for="gender">Gender</label>
         <InputText id="gender" @bind-Value="CurrentPassportUser.Gender" class="form-control"></InputText>
+        <ValidationMessage For="@(() => CurrentPassportUser.Gender)" />
     </div>
     <div>
         <label for="nationality">Nationality</label>
         <InputText id="nationality" @bind-Value="CurrentPassportUser.Nationality" class="form-control"></InputText>
+        <ValidationMessage For="@(() => CurrentPassportUser.Nationality)" />
     </div>
     <div>
         <label for="validDate">Passport valid date</label>
         <InputDate id="validDate" @bind-Value="CurrentPassportUser.ValidDate" class="form-control"></InputDate>
+        <ValidationMessage For="@(() => CurrentPassportUser.ValidDate)" />
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
+    <div>
+        <form
+            <div>
+                <label for="file">Upload User Image:</label>
+                <InputFile OnChange="HandleFileSelected" />
+            </div>
+        </form>
+    </div>
+    <button  class="btn btn-primary" type="submit" >Save</button>
 </EditForm>
+@if (errorMessage != null)
+{
+    <p style="color: red;">@errorMessage</p>
+}
+

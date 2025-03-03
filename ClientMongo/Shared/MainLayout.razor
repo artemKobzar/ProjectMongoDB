@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@using ClientMongo.Services
+@inject UserGettingClaimsService UserClaimService
 
 <PageTitle>ClientMongo</PageTitle>
 
@@ -9,6 +11,7 @@
 
     <main>
         <div class="top-row px-4">
+            <a>Welcome, <b>@UserClaimService.GetName()</b></a>
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
         </div>
 

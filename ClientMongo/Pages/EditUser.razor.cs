@@ -13,6 +13,10 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using IdentityServer4.Test;
 using System.Reflection;
+using MongoDB.Bson;
+using Microsoft.AspNetCore.Components.Forms;
+using System.Xml.Linq;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace ClientMongo.Pages
@@ -24,10 +28,14 @@ namespace ClientMongo.Pages
         private List<User> UsersWithPassport = new();
         public User CurrentUser { get; set; } = new();
         public PassportUser CurrentPassportUser { get; set; } = new();
+        private EditContext editContext;
+        private ValidationMessageStore validationMessages;
+        private string? errorMessage;
+        private IBrowserFile? SelectedFile { get; set; }
         [Inject] private HttpClient HttpClient { get; set; }
         [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; }
         [Inject] private IConfiguration Config { get; set; }
-        [Inject] public NavigationManager UrlNavigationManager { get; set; }
+        [Inject] public NavigationManager NavigationManager { get; set; }
 
         protected override async Task OnParametersSetAsync()
         {
@@ -35,70 +43,108 @@ namespace ClientMongo.Pages
             HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             if (Id != null)
             {
-                //var user = await HttpClient.GetAsync($"{Config["apiUrl"]}/UserWithPassport/{Id}");
-                //var user = await HttpClient.GetFromJsonAsync<User>($"{Config["apiUrl"]}/UserWithPassport/{Id}");
                 List<User> Users = await HttpClient.GetFromJsonAsync<List<User>>($"{Config["apiUrl"]}/UserWithPassport/{Id}");
                 var user = Users[0];
                 if (user != null)
                 {
-                    //CurrentUser = await user.Content.ReadFromJsonAsync<User>();
                     CurrentUser = user;
                     CurrentPassportUser = CurrentUser.Passport;
-                    //CurrentUser = JsonConvert.DeserializeObject<User>(Convert.ToString(user.Content));
                 }
+            }
+            editContext = new EditContext(CurrentUser);
+            validationMessages = new ValidationMessageStore(editContext);
+        }
+        private async Task HandleFileSelected (InputFileChangeEventArgs e)
+        {
+            SelectedFile = e.File;
+        }
+        private async Task UploadFile()
+        {
+            if (SelectedFile == null)
+            {
+                Console.WriteLine("No file selected!");
+                return;
+            }
+            var accessToken = await HttpContextAccessor.HttpContext.GetTokenAsync("access_token");
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            using var content = new MultipartFormDataContent();
+            using var filestream = SelectedFile.OpenReadStream(1024*1024);
+            content.Add(new StreamContent(filestream), "file", SelectedFile.Name);
+            
+            var fileName = Path.GetFileNameWithoutExtension(SelectedFile.Name);
+            var passportId = CurrentPassportUser.Id;
+
+            var response = await HttpClient.PostAsync($"{Config["apiUrl"]}/api/UserImage/upload?name={fileName}&passportId={passportId}", content);
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("File has been uploaded successfully");
+            }
+            else
+            {
+                Console.WriteLine($"File upload failed: {response.ReasonPhrase}");
             }
         }
         private async Task HandleSubmit()
         {
             var accessToken = await HttpContextAccessor.HttpContext.GetTokenAsync("access_token");
             HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
             if (Id == null)
             {
                 try
                 {
                     //CurrentUser.Id = Guid.NewGuid().ToString("N");
+                    CurrentUser.Id = ObjectId.GenerateNewId().ToString();
                     //CurrentPassportUser.Id = Guid.NewGuid().ToString("N");
-                    CurrentUser.Passport = CurrentPassportUser;
-                    CurrentUser.Passport.UserId = CurrentUser.Id;
+                    CurrentPassportUser.Id = ObjectId.GenerateNewId().ToString();
+                    
                     await HttpClient.PostAsJsonAsync($"{Config["apiUrl"]}/AddUser", CurrentUser);
+                    CurrentPassportUser.UserId = CurrentUser.Id;
+                    //CurrentUser.Passport = CurrentPassportUser;
                     await HttpClient.PostAsJsonAsync($"{Config["apiUrl"]}/AddPassport", CurrentPassportUser);
+                    if (SelectedFile !=  null)
+                    {
+                        await UploadFile();
+                    }
+                    NavigationManager.NavigateTo("/users");
                 }
-                catch(BadHttpRequestException ex)
+                catch (BadHttpRequestException ex)
                 {
                     throw new BadHttpRequestException(ex.Message);
                 }
-
+                catch (Exception ex)
+                {
+                    errorMessage = $"An error occurred: {ex.Message}";
+                    StateHasChanged();  //  Ensure UI updates
+                }
             }
             else
             {
                 CurrentUser.Passport = CurrentPassportUser;
                 await HttpClient.PutAsJsonAsync($"{Config["apiUrl"]}/updateUser/{CurrentUser.Id}", CurrentUser);
                 await HttpClient.PutAsJsonAsync($"{Config["apiUrl"]}/updatePassport/{CurrentPassportUser.Id}", CurrentPassportUser);
+                if (SelectedFile != null)
+                {
+                    await UploadFile();
+                }
                 StateHasChanged();
-                UrlNavigationManager.NavigateTo("/users");
+                NavigationManager.NavigateTo("/users");
             }
         }
-        //private async Task Create()
-        //{
-        //    var accessToken = await HttpContextAccessor.HttpContext.GetTokenAsync("access_token");
-        //    HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        //    var result = await HttpClient.PostAsJsonAsync("/api/user/", user);
-        //}
-
-        //private async Task Update(string id)
-        //{
-
-        //}
     }
 }
-//protected override async Task OnInitializedAsync()
-//{
-//    var accessToken = await HttpContextAccessor.HttpContext.GetTokenAsync("access_token");
-//    HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-//    var result = await HttpClient.GetAsync(Config["apiUrl"] + "/users");
 
-//    if (result.IsSuccessStatusCode)
-//    {
-//        Users1 = await result.Content.ReadFromJsonAsync<List<User>>();
-//    }
+//var user = await HttpClient.GetAsync($"{Config["apiUrl"]}/UserWithPassport/{Id}");
+//var user = await HttpClient.GetFromJsonAsync<User>($"{Config["apiUrl"]}/UserWithPassport/{Id}");
+
+
+//CurrentUser = await user.Content.ReadFromJsonAsync<User>();
+//CurrentUser = JsonConvert.DeserializeObject<User>(Convert.ToString(user.Content));
+
+//if (!editContext.Validate())
+//{
+//    Console.WriteLine("Validation failed! Stopping form submission.");
+//    errorMessage = "Validation failed! Please check the form.";
+//    StateHasChanged();  // ✅ Ensure UI updates
+//    return;  // 🚨 Prevent navigation
 //}

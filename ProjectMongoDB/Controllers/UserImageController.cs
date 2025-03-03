@@ -4,6 +4,8 @@ using ProjectMongoDB.Repositories;
 
 namespace ProjectMongoDB.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class UserImageController: ControllerBase
     {
         private readonly IUserImageRepository _userImageRepository;
@@ -31,6 +33,12 @@ namespace ProjectMongoDB.Controllers
             }
             var nameFormat = $"{name}.jpg";
             return File(image, "application/octet-stream", nameFormat);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            await _userImageRepository.DeleteImage(id);
+            return NoContent();
         }
     }
 }
