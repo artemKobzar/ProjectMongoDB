@@ -32,7 +32,7 @@ namespace ProjectMongoDB.Repositories
 
         public async Task<ObjectId> UploadImage(Stream fileStream, string fileName, string passportId)
         {
-            var fileId =  _gridFSBucket.UploadFromStream(fileName, fileStream);
+            var fileId = await _gridFSBucket.UploadFromStreamAsync(fileName, fileStream);
             var image = new UserImage
             {
                 Id = fileId.ToString(),

@@ -15,6 +15,8 @@ using System.Net.Http.Headers;
 using System.Collections;
 using System.Reflection;
 using MongoDB.Bson;
+using IdentityServer4.Test;
+using MongoDB.Driver.GridFS;
 
 namespace ProjectMongoDB.IntegrationTests
 {
@@ -24,7 +26,7 @@ namespace ProjectMongoDB.IntegrationTests
         private readonly IMongoCollection<PassportUser> _passportUserCollection;
         private readonly IMongoCollection<UserImage> _userImageCollection;
         private readonly HttpClient _client;
-
+        private readonly GridFSBucket _gridFSBucket;
         public UserControllerIntegrationTests(CustomWebApplicationFactory<Program> factory)
         {
             _client = factory.CreateClient();
@@ -35,7 +37,7 @@ namespace ProjectMongoDB.IntegrationTests
             _userCollection = database.GetCollection<User>("Users");
             _passportUserCollection = database.GetCollection<PassportUser>("PassportUsers");
             _userImageCollection = database.GetCollection<UserImage>("UsersImage");
-
+            _gridFSBucket = new GridFSBucket(database);
             // Ensure the collection is clean before each test
             _userCollection.DeleteMany(FilterDefinition<User>.Empty);
             _passportUserCollection.DeleteMany(FilterDefinition<PassportUser>.Empty);
@@ -162,6 +164,176 @@ namespace ProjectMongoDB.IntegrationTests
             Assert.NotNull(createdUser);
             Assert.Equal("Michael", createdUser.FirstName);
             Assert.Equal("10/11/2028", createdUser.Passport.ValidDate.ToString());
+        }
+
+        [Fact]
+        public async Task UpdateUser_ReturnOk_WhenItsUpdated()
+        {
+            // Arrange: Seed some test data in the Users collection
+            var testUsers = new List<User>
+            {
+                new User {Id = "657ad18d6060e307f58a2e33", FirstName = "Michael", LastName = "Jordan", PhoneNumber = "3809911111122", Email = "j@gmail.com", Address = "Chicago"},
+                new User {Id = "657ad18d6060e307f58a2e44", FirstName = "Kobe", LastName = "Bryant", PhoneNumber = "3806611111122", Email = "b@gmail.com", Address = "Los Angeles"}
+            };
+            await _userCollection.InsertManyAsync(testUsers);
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("TestScheme");
+
+            var user = new User { Id = "657ad18d6060e307f58a2e33", FirstName = "Michael", LastName = "Jackson", PhoneNumber = "3809911111122", Email = "j@gmail.com", Address = "Los Angeles" }; 
+            // Act: Send an HTTP PUT request to the /updateUser endpoint
+            var response = await _client.PutAsJsonAsync("/updateUser/657ad18d6060e307f58a2e33", user);
+
+            // Assert: Verify the response
+            response.EnsureSuccessStatusCode();  // Ensures status code is 2xx
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            response = await _client.GetAsync("/api/user/657ad18d6060e307f58a2e33");
+            var updatedUser = await response.Content.ReadFromJsonAsync<User>();
+            Assert.Equal("Jackson", updatedUser.LastName);
+        }
+
+        [Fact]
+        public async Task DeleteUser_ReturnNoContent()
+        {
+            // Arrange: Seed some test data in the Users collection
+            var testUsers = new List<User>
+            {
+                new User {Id = "657ad18d6060e307f58a2e33", FirstName = "Michael", LastName = "Jordan", PhoneNumber = "3809911111122", Email = "j@gmail.com", Address = "Chicago"},
+                new User {Id = "657ad18d6060e307f58a2e44", FirstName = "Kobe", LastName = "Bryant", PhoneNumber = "3806611111122", Email = "b@gmail.com", Address = "Los Angeles"}
+            };
+            await _userCollection.InsertManyAsync(testUsers);
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("TestScheme");
+
+            // Act: Send an HTTP DELETE request to the /user delete endpoint
+            var response = await _client.DeleteAsync("/api/user/657ad18d6060e307f58a2e33");
+
+            // Assert: Verify the response
+            response.EnsureSuccessStatusCode();  // Ensures status code is 2xx
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UploadImage_ReturnsOk_WhenFileIsUploaded()
+        {
+            // ✅ Ensure a PassportUser exists before uploading
+            var passportId = ObjectId.GenerateNewId().ToString();
+            var testPassport = new PassportUser { Id = passportId, UserId = ObjectId.GenerateNewId().ToString(), Image = null };
+            await _passportUserCollection.InsertOneAsync(testPassport);
+            // Arrange: Create a fake file (a small text file in memory)
+            var fileName = "test.jpg";
+            var fileBytes = new byte[] { 255, 216, 255, 224 }; // Minimal JPEG header
+            var stream = new MemoryStream(fileBytes);
+            var file = new StreamContent(stream);
+            file.Headers.ContentType = new MediaTypeHeaderValue("image/jpg");
+
+            // Create multipart form data content (to simulate a real file upload)
+            var formData = new MultipartFormDataContent
+            {
+                { file, "file", fileName }
+            };
+
+            // Add query parameters
+            var name = "testUser";
+
+            // Act: Send an HTTP POST request
+            var response = await _client.PostAsync($"/api/user/uploadImage?name={name}&passportId={passportId}", formData);
+
+            // Assert: Verify response
+            response.EnsureSuccessStatusCode();  // Ensures status code is 2xx
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            // Verify the returned file ID
+            var fileId = await response.Content.ReadAsStringAsync();
+            Assert.False(string.IsNullOrWhiteSpace(fileId), "File ID should not be empty");
+        }
+
+        [Fact]
+        public async Task DownloadUserImageById_ReturnsFile_WhenImageExists()
+        {
+            // Arrange: Create test user and passport data
+            var userId = ObjectId.GenerateNewId().ToString();
+            var passportId = ObjectId.GenerateNewId().ToString();
+            var imageName = "testUserImage";
+            var testImageBytes = new byte[] { 255, 216, 255, 224 }; // Minimal JPEG header
+
+            var testUser = new User
+            {
+                Id = userId,
+                Passport = new PassportUser
+                {
+                    Id = passportId,
+                    UserId = userId,
+                    Image = new UserImage
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        Name = imageName,
+                        Size = testImageBytes.Length,
+                        ImageType = ".jpg",
+                        PassportUserId = passportId
+                    }
+                }
+            };
+
+            // Insert test user and passport into MongoDB collections
+            await _userCollection.InsertOneAsync(testUser);
+            await _passportUserCollection.InsertOneAsync(testUser.Passport);
+            await _userImageCollection.InsertOneAsync(testUser.Passport.Image);
+
+            // Upload the test image to GridFS
+            using (var memoryStream = new MemoryStream(testImageBytes))
+            {
+                await _gridFSBucket.UploadFromStreamAsync(imageName, memoryStream);
+            }
+
+            // Act: Send an HTTP GET request to download the image
+            var response = await _client.GetAsync($"/downloadImage/{userId}");
+
+            // Assert: Verify the response
+            response.EnsureSuccessStatusCode(); // Status should be 200 OK
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("application/octet-stream", response.Content.Headers.ContentType.ToString());
+
+            // Verify the returned file contents
+            var actualBytes = await response.Content.ReadAsByteArrayAsync();
+            Assert.Equal(testImageBytes, actualBytes);
+        }
+
+        [Fact]
+        public async Task DownloadUserImageById_ReturnsDefaultImage_WhenUserHasNoImage()
+        {
+            // Arrange: Create test user with no image
+            var userId = ObjectId.GenerateNewId().ToString();
+            var passportId = ObjectId.GenerateNewId().ToString();
+
+            var testUser = new User
+            {
+                Id = userId,
+                Passport = new PassportUser
+                {
+                    Id = passportId,
+                    UserId = userId,
+                    Image = new UserImage //  Ensure Image is not null before inserting!
+                    {
+                        Name = "default.jpg",
+                        ImageType = ".jpg",
+                        PassportUserId = passportId
+                    }
+                }
+            };
+
+            // Insert test user into MongoDB
+            await _userCollection.InsertOneAsync(testUser);
+            await _passportUserCollection.InsertOneAsync(testUser.Passport);
+
+            // Act: Send an HTTP GET request to download the image
+            var response = await _client.GetAsync($"/downloadImage/{userId}");
+
+            // Assert: Verify the response
+
+            response.EnsureSuccessStatusCode(); // Should return 200 OK
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("image/jpeg", response.Content.Headers.ContentType.ToString());
         }
     }
 }

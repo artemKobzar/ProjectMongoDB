@@ -146,46 +146,77 @@ namespace ProjectMongoDB.Repositories
         }
         public async Task<User> DownloadUserImageById(string id)
         {
-            var filter = filterBuilder.Empty;
-
-            var users = await _userCollection.Find(u => u.Id == id).ToListAsync();
-            foreach (var user in users)
+            // Find the user
+            var user = await _userCollection.Find(u => u.Id == id).FirstOrDefaultAsync();
+            if (user == null)
             {
-                var passportUser = await _passportUserCollection.Find(u => u.UserId == user.Id).FirstOrDefaultAsync();
-                if (passportUser != null)
+                return null;  // Return null if user does not exist
+            }
+            // Find the passport for the user
+            var passportUser = await _passportUserCollection.Find(u => u.UserId == user.Id).FirstOrDefaultAsync();
+            if (passportUser != null)
+            {
+                user.Passport = passportUser;
+
+                // Find the user's image
+                var userImage = await _userImageCollection.Find(u => u.PassportUserId == passportUser.Id).FirstOrDefaultAsync();
+                if (userImage != null)
                 {
-                    user.Passport = passportUser;
-
-                    var userImage = await _userImageCollection.Find(u => u.PassportUserId == passportUser.Id).FirstOrDefaultAsync();
-                    if (userImage != null)
+                    passportUser.Image = userImage;
+                }
+                else
+                {
+                    // Assign default image
+                    passportUser.Image = new UserImage
                     {
-                        passportUser.Image = userImage;
-
-                    }
-                    else
-                    {
-                        passportUser.Image = new UserImage
-                        {
-                            Name = "default.png",
-                            //ImageType = ".png",
-                            PassportUserId = passportUser.Id
-                        };
-                    }
+                        Name = "default.jpg",
+                        ImageType = ".jpg",
+                        PassportUserId = passportUser.Id
+                    };
                 }
             }
-            var userId = users.Find(u => u.Id == id);
-            if (userId?.Passport?.Image?.Name == "default.png")
-            {
-                var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "default.png");
-
-                userId.Passport.Image.Name = defaultImagePath; // Reference the local path for default image
-            }
-            else
-            {
-                var image = _gridFSBucket.DownloadAsBytesByName(userId.Passport.Image.Name);
-            }
-
-            return userId;
+            return user;
         }
     }
 }
+//    var filter = filterBuilder.Empty;
+
+//    var users = await _userCollection.Find(u => u.Id == id).ToListAsync();
+//    foreach (var entity in users)
+//    {
+//        var passportUser = await _passportUserCollection.Find(u => u.UserId == entity.Id).FirstOrDefaultAsync();
+//        if (passportUser != null)
+//        {
+//            entity.Passport = passportUser;
+
+//            var userImage = await _userImageCollection.Find(u => u.PassportUserId == passportUser.Id).FirstOrDefaultAsync();
+//            if (userImage != null)
+//            {
+//                passportUser.Image = userImage;
+
+//            }
+//            else
+//            {
+//                passportUser.Image = new UserImage
+//                {
+//                    //Name = "default.png",
+//                    Name = "default",
+//                    ImageType = ".jpg",
+//                    PassportUserId = passportUser.Id
+//                };
+//            }
+//        }
+//    }
+//    var user = users.Find(u => u.Id == id);
+//    if (user?.Passport?.Image?.Name == "default.jpg")
+//    {
+//        var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "default.jpg");
+
+//        user.Passport.Image.Name = defaultImagePath; // Reference the local path for default image
+//    }
+//    else
+//    {
+//        var image = _gridFSBucket.DownloadAsBytesByName(user.Passport.Image.Name);
+//    }
+
+//    return user;

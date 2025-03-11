@@ -1,4 +1,5 @@
 ﻿using IdentityModel.Client;
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +9,7 @@ using ProjectMongoDB.Entities;
 using ProjectMongoDB.Repositories;
 using ProjectMongoDB.Services;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Xml.Linq;
 
 namespace ProjectMongoDB.Controllers
@@ -103,10 +105,12 @@ namespace ProjectMongoDB.Controllers
         [HttpPost("uploadImage")]
         public async Task<IActionResult> UploadImage([FromQuery] string name, string passportId, IFormFile file)
         {
+            Console.WriteLine($"Received file: {file.FileName}, Size: {file.Length}");
+            Console.WriteLine($"User: {name}, PassportId: {passportId}");
             using (var fileStream = file.OpenReadStream())
             {
                 var fullFileName = $"{name}{file.ContentType}";
-                var fileId = _userImageRepository.UploadImage(fileStream, name ?? file.Name, passportId);
+                var fileId = await _userImageRepository.UploadImage(fileStream, name ?? file.Name, passportId);
                 return Ok(fileId);
             }
         }
@@ -119,10 +123,22 @@ namespace ProjectMongoDB.Controllers
             {
                 return NotFound();
             }
-            var imageName = user.Passport.Image.Name;
+            var imageName = user.Passport?.Image?.Name;
+            if (imageName == "default.jpg")
+            {
+                // Return the default image from wwwroot
+                var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "default.jpg");
+
+                if (!System.IO.File.Exists(defaultImagePath))
+                {
+                    return NotFound("Default image not found.");
+                }
+
+                var defaultImageBytes = await System.IO.File.ReadAllBytesAsync(defaultImagePath);
+                return File(defaultImageBytes, "image/jpeg", "default.jpg");
+            }
             var image = _userImageRepository.DownloadImage(imageName);
             var nameFormat = $"{imageName}.jpg";
-
             return File(image, "application/octet-stream", nameFormat);
         }
     }
