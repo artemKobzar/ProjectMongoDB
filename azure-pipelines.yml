@@ -20,20 +20,12 @@ steps:
       version: '7.x'  # Specify the .NET SDK version compatible with your project
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
-  - script: dotnet nuget locals all --clear
-    displayName: 'Clear NuGet Cache'
-
-  - task: NuGetCommand@2
-    displayName: 'Restore NuGet Packages'
-    inputs:
-      restoreSolution: 'ProjectMongoDB.sln'  # Use your actual solution file name
-
   - task: DotNetCoreCLI@2
     displayName: 'Build Solution'
     inputs:
       command: 'build'
       projects: '**/*.sln'  # Builds all solution files
-      arguments: '--configuration $(buildConfiguration)'
+      arguments: '--configuration $(buildConfiguration) --no-restore'
 
   - task: DotNetCoreCLI@2
     displayName: 'Run Tests'
