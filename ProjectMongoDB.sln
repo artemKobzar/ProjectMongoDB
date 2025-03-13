@@ -14,7 +14,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DuendeIdentity", "DuendeIde
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientMongo", "ClientMongo\ClientMongo.csproj", "{56E61C88-E20C-4F62-816D-243B1B84F2ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectMongoDB.IntegrationTests", "ProjectMongoDB.IntegrationTests\ProjectMongoDB.IntegrationTests.csproj", "{FE09F5C1-4489-4519-9B50-ACB0F33D9927}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectMongoDB.IntegrationTests", "ProjectMongoDB.IntegrationTests\ProjectMongoDB.IntegrationTests.csproj", "{FE09F5C1-4489-4519-9B50-ACB0F33D9927}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{68028F8E-32D0-4802-A742-D60B1DEE1C79}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		azure-pipelines.yml = azure-pipelines.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
