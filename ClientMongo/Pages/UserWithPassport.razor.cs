@@ -1,6 +1,4 @@
-﻿using ClientMongo.Services;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Rendering;
 using ProjectMongoDB.Entities;
@@ -12,7 +10,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Helpers;
 using Microsoft.JSInterop;
-using IdentityServer4.Models;
 
 
 namespace ClientMongo.Pages

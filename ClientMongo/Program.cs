@@ -1,6 +1,4 @@
 using ClientMongo.Services;
-using IdentityModel;
-using IdentityServer4.AccessTokenValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
@@ -23,7 +21,7 @@ namespace ClientMongo
             builder.Services.AddServerSideBlazor();
             builder.Services.AddHttpClient();
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<ITokenService, TokenService>();
+            //builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<UserGettingClaimsService>();
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             builder.Services.AddAuthentication(options =>

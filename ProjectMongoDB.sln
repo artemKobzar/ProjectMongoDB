@@ -4,11 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectMongoDB", "ProjectMongoDB\ProjectMongoDB.csproj", "{58891DCE-C508-4730-A0A0-D1E7FD2FD7BE}"
-	ProjectSection(ProjectDependencies) = postProject
-		{551C9070-66C3-4068-802F-149AB5388CAF} = {551C9070-66C3-4068-802F-149AB5388CAF}
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityService4", "IdentityService4\IdentityService4.csproj", "{551C9070-66C3-4068-802F-149AB5388CAF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DuendeIdentity", "DuendeIdentity\DuendeIdentity.csproj", "{EE520839-CAD6-4710-AD98-BAA3731C49E9}"
 EndProject
@@ -33,10 +28,6 @@ Global
 		{58891DCE-C508-4730-A0A0-D1E7FD2FD7BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58891DCE-C508-4730-A0A0-D1E7FD2FD7BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58891DCE-C508-4730-A0A0-D1E7FD2FD7BE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{551C9070-66C3-4068-802F-149AB5388CAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{551C9070-66C3-4068-802F-149AB5388CAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{551C9070-66C3-4068-802F-149AB5388CAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{551C9070-66C3-4068-802F-149AB5388CAF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EE520839-CAD6-4710-AD98-BAA3731C49E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EE520839-CAD6-4710-AD98-BAA3731C49E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE520839-CAD6-4710-AD98-BAA3731C49E9}.Release|Any CPU.ActiveCfg = Release|Any CPU

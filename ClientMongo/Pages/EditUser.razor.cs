@@ -1,5 +1,4 @@
-﻿using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using ProjectMongoDB.Entities;
@@ -11,7 +10,6 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using IdentityServer4.Test;
 using System.Reflection;
 using MongoDB.Bson;
 using Microsoft.AspNetCore.Components.Forms;

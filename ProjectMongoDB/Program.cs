@@ -1,13 +1,9 @@
 using ProjectMongoDB.DbContext;
 using ProjectMongoDB.Repositories;
-using IdentityServer4;
-using IdentityServer4.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using IdentityServer4.AccessTokenValidation;
 using Microsoft.OpenApi.Models;
 using Amazon.Runtime.Internal.Transform;
-using ProjectMongoDB.Services;
 using ProjectMongoDB;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
@@ -90,69 +86,3 @@ app.UseEndpoints(endpoints =>
 app.Run();
 public partial class Program { }
 
-//builder.Services.AddAuthentication(options =>
-//    {
-//        options.DefaultScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
-//        options.DefaultAuthenticateScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
-//        options.DefaultChallengeScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
-//    })
-//    .AddIdentityServerAuthentication(options =>
-//    {
-//        options.ApiName = "ProjectMongoDB";
-//        options.Authority = "https://localhost:7255";
-//        options.RequireHttpsMetadata = false;
-//    });
-//app.UseHttpsRedirection();
-//app.MapControllers();
-
-//builder.Services.AddAuthentication("Bearer")
-//    .AddIdentityServerAuthentication("Bearer", options =>
-//    {
-//        options.ApiName = "ProjectMongoDB";
-//        options.Authority = "https://localhost:7353";
-//        options.RequireHttpsMetadata = false;
-
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateAudience = false,
-//            NameClaimType = "name",
-//            RoleClaimType = "role"
-//        };
-//    });
-
-// Swagger options to configure Authorization Code
-//options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-//{
-//    Type = SecuritySchemeType.OAuth2,
-//    Flows = new OpenApiOAuthFlows
-//    {
-//        AuthorizationCode = new OpenApiOAuthFlow
-//        {
-//            AuthorizationUrl = new Uri("https://localhost:7255/connect/authorize"),
-//            TokenUrl = new Uri("https://localhost:7255/connect/token"),
-//            Scopes = new Dictionary<string, string>
-//                {
-//                    {"ProjectMongoDB", "Web API" }
-//                }
-//        }
-//    }
-//});
-//    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "oath2"
-//                },
-//                Scheme = "oath2",
-//                Name = "Bearer",
-//                In = ParameterLocation.Header
-//            },
-//            new List<string>()
-//        }
-//    });
-//    options.OperationFilter<AuthorizeCheckOperationFilter>();
-//});

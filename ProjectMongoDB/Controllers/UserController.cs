@@ -1,13 +1,10 @@
-﻿using IdentityModel.Client;
-using IdentityServer4.Models;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using ProjectMongoDB.Entities;
 using ProjectMongoDB.Repositories;
-using ProjectMongoDB.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Xml.Linq;
