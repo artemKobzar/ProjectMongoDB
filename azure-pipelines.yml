@@ -17,13 +17,16 @@ steps:
     displayName: 'Install .NET SDK'
     inputs:
       packageType: 'sdk'
-      version: '8.x'  # Specify the .NET SDK version compatible with your project
+      version: '7.x'  # Specify the .NET SDK version compatible with your project
       installationPath: $(Agent.ToolsDirectory)/dotnet
+
+  - script: dotnet nuget locals all --clear
+    displayName: 'Clear NuGet Cache'
 
   - task: NuGetCommand@2
     displayName: 'Restore NuGet Packages'
     inputs:
-      restoreSolution: '**/*.sln'  # Restores packages for all solution files
+      restoreSolution: 'ProjectMongoDB.sln'  # Use your actual solution file name
 
   - task: DotNetCoreCLI@2
     displayName: 'Build Solution'
@@ -38,6 +41,7 @@ steps:
       command: 'test'
       projects: '**/*.IntegrationTests.csproj'  # Runs tests for all test projects
       arguments: '--configuration $(buildConfiguration) --logger trx --results-directory $(Agent.TempDirectory)/TestResults'
+      failOnStandardError: true
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
