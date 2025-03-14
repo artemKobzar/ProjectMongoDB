@@ -36,15 +36,8 @@ steps:
     inputs:
       command: 'test'
       projects: '**/*.IntegrationTests.csproj'  # Runs tests for all test projects
-      arguments: '--configuration $(buildConfiguration) --logger trx --results-directory $(Agent.TempDirectory)/TestResults'
+      arguments: '--configuration $(buildConfiguration)'
 
-  - task: PublishTestResults@2
-    displayName: 'Publish Test Results'
-    inputs:
-      testResultsFormat: 'VSTest'
-      testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
-      searchFolder: '$(Agent.TempDirectory)/TestResults'
-      testRunTitle: 'Test Results'
 
 
 
