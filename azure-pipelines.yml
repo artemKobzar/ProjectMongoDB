@@ -31,12 +31,16 @@ steps:
       projects: '**/*.sln'  # Builds all solution files
       arguments: '--configuration $(buildConfiguration)'
 
+  - script: |
+      nc -zv localhost 27017
+    displayName: 'Check MongoDB Connection'
+
   - task: DotNetCoreCLI@2
     displayName: 'Run Tests'
     inputs:
       command: 'test'
       projects: '**/*.IntegrationTests.csproj'  # Runs tests for all test projects
-      arguments: '--configuration $(buildConfiguration)'
+      arguments: '--configuration $(buildConfiguration) --logger trx --results-directory $(Agent.TempDirectory)/TestResults --verbosity detailed'
 
 
 
