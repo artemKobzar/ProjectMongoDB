@@ -69,7 +69,7 @@ steps:
     inputs:
       command: 'test'
       projects: '**/*.IntegrationTests.csproj'
-      arguments: '--configuration Release --logger trx --results-directory $(Agent.TempDirectory)/TestResults'
+      arguments: '--configuration $(buildConfiguration)'
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
