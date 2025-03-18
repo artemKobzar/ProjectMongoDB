@@ -59,11 +59,22 @@ steps:
   - script: find $(System.DefaultWorkingDirectory) -name "*.csproj"
     displayName: 'Debug: List all .csproj files'
 
-  # **Check for Default Image**
   - script: |
-      echo "Checking if default image exists..."
-      ls -lah $(Build.SourcesDirectory)/path-to-default-images/
-    displayName: 'Debug: Verify Default Image'
+      echo "Creating wwwroot folder..."
+      mkdir -p $(System.DefaultWorkingDirectory)/ProjectMongoDB.IntegrationTests/wwwroot
+      ls -lah $(System.DefaultWorkingDirectory)/ProjectMongoDB.IntegrationTests
+    displayName: 'Ensure wwwroot Exists'
+
+  - script: |
+      echo "Copying default image..."
+      mkdir -p $(System.DefaultWorkingDirectory)/ProjectMongoDB.IntegrationTests/wwwroot/images
+      cp $(Build.SourcesDirectory)/path-to-default-images/default.jpg $(System.DefaultWorkingDirectory)/ProjectMongoDB.IntegrationTests/wwwroot/images/default.jpg
+    displayName: 'Copy Default Image'
+
+  - script: |
+      echo "Verifying default image..."
+      ls -lah $(System.DefaultWorkingDirectory)/ProjectMongoDB.IntegrationTests/wwwroot/images
+    displayName: 'Debug: Check Default Image'
 
   - task: DotNetCoreCLI@2
     displayName: 'Run Tests'
