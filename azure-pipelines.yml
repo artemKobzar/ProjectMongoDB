@@ -36,20 +36,34 @@ steps:
     displayName: 'Start MongoDB in Docker'
 
   - script: |
-      for i in {1..10}; do
-        nc -zv localhost 27017 && exit 0
-        sleep 3
+      echo "Waiting for MongoDB to be fully ready..."
+      for i in {1..30}; do
+        nc -zv localhost 27017 && echo "MongoDB is up!" && exit 0
+        echo "Waiting..."
+        sleep 2
       done
-      exit 1
-    displayName: 'Ensure MongoDB is Ready'
+      echo "MongoDB did not start in time" && exit 1
+    displayName: 'Wait for MongoDB (Improved)'
+
+  # **MongoDB Debugging**
+  - script: |
+      docker exec mongodb mongosh --eval "db.runCommand({ ping: 1 })"
+    displayName: 'Debug: MongoDB Ping Test'
 
   - script: |
-      nc -zv localhost 27017
-    displayName: 'Check MongoDB Connection'
+      docker exec mongodb mongosh --eval "show dbs"
+      docker exec mongodb mongosh --eval "use testdb; show collections"
+    displayName: 'Debug: Check MongoDB State'
 
   # **Debug: List All .csproj Files**
   - script: find $(System.DefaultWorkingDirectory) -name "*.csproj"
     displayName: 'Debug: List all .csproj files'
+
+  # **Check for Default Image**
+  - script: |
+      echo "Checking if default image exists..."
+      ls -lah $(Build.SourcesDirectory)/path-to-default-images/
+    displayName: 'Debug: Verify Default Image'
 
   - task: DotNetCoreCLI@2
     displayName: 'Run Tests'
@@ -57,6 +71,14 @@ steps:
       command: 'test'
       projects: 'ProjectMongoDB.IntegrationTests/ProjectMongoDB.IntegrationTests.csproj'
       arguments: '--logger trx --results-directory $(Agent.TempDirectory)/TestResults --configuration Release --verbosity detailed'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testResultsFormat: 'VSTest'
+      testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
+      mergeTestResults: true
+      failTaskOnFailedTests: true
 
 
 
