@@ -20,7 +20,6 @@ steps:
       version: '7.x'  # Specify the .NET SDK version compatible with your project
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
-      
   - script: dotnet restore --ignore-failed-sources --verbosity detailed
     displayName: 'Restore NuGet Packages (Debug Mode)'
 
@@ -30,30 +29,33 @@ steps:
       command: 'build'
       projects: '**/*.sln'  # Builds all solution files
       arguments: '--configuration $(buildConfiguration)'
-      
-  
+
   # **Start MongoDB in Docker**
   - script: |
       docker run -d --name mongodb -p 27017:27017 mongo:latest
     displayName: 'Start MongoDB in Docker'
 
-  # **Wait for MongoDB to Start **
   - script: |
-      for i in {1..30}; do # Try 30 times
-        nc -zv localhost 27017 && break
-        sleep 1
+      for i in {1..10}; do
+        nc -zv localhost 27017 && exit 0
+        sleep 3
       done
-      if [[ $i -eq 31 ]]; then
-        echo "Failed to connect to MongoDB after 30 attempts"
-        exit 1
-      fi
-    displayName: 'Check MongoDB Connection with Retry'
+      exit 1
+    displayName: 'Ensure MongoDB is Ready'
+
+  - script: |
+      nc -zv localhost 27017
+    displayName: 'Check MongoDB Connection'
+
+  # **Debug: List All .csproj Files**
+  - script: find $(System.DefaultWorkingDirectory) -name "*.csproj"
+    displayName: 'Debug: List all .csproj files'
 
   - task: DotNetCoreCLI@2
     displayName: 'Run Tests'
     inputs:
       command: 'test'
-      projects: '/home/vsts/work/1/s/ProjectMongoDB.IntegrationTests/ProjectMongoDB.IntegrationTests.csproj' # Explicit path  # Runs tests for all test projects
+      projects: '$(System.DefaultWorkingDirectory)/**/*.IntegrationTests.csproj'
       arguments: '--logger trx --results-directory $(Agent.TempDirectory)/TestResults --configuration Release --verbosity detailed'
 
 
