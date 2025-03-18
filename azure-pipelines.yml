@@ -61,7 +61,7 @@ steps:
 
   - script: |
       echo "Verifying default image..."
-      ls -lah $(System.DefaultWorkingDirectory)/ProjectMongoDB.IntegrationTests/wwwroot/images
+      ls -lah $(System.DefaultWorkingDirectory)/ProjectMongoDB.IntegrationTests/wwwroot
     displayName: 'Debug: Check Default Image'
 
   - task: DotNetCoreCLI@2
