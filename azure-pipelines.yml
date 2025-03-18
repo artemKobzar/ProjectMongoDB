@@ -30,6 +30,17 @@ steps:
       command: 'build'
       projects: '**/*.sln'  # Builds all solution files
       arguments: '--configuration $(buildConfiguration)'
+      
+  
+  # **Start MongoDB in Docker**
+  - script: |
+      docker run -d --name mongodb -p 27017:27017 mongo:latest
+    displayName: 'Start MongoDB in Docker'
+
+  # **Wait for MongoDB to Start **
+  - script: |
+      sleep 10  # Wait 10 seconds to make sure MongoDB is up
+    displayName: 'Wait for MongoDB to be Ready'
 
   - script: |
       nc -zv localhost 27017
