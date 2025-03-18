@@ -56,7 +56,7 @@ steps:
     inputs:
       command: 'test'
       projects: 'ProjectMongoDB.IntegrationTests/ProjectMongoDB.IntegrationTests.csproj'
-      arguments: '--configuration $(buildConfiguration)'
+      arguments: '--logger trx --results-directory $(Agent.TempDirectory)/TestResults --configuration Release --verbosity detailed'
 
 
 
