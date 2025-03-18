@@ -68,7 +68,7 @@ steps:
     displayName: 'Run Tests'
     inputs:
       command: 'test'
-      projects: '**/*.IntegrationTests.csproj'
+      projects: '**/ProjectMongoDB.IntegrationTests.csproj'
       arguments: '--configuration $(buildConfiguration)'
 
   - task: PublishTestResults@2
