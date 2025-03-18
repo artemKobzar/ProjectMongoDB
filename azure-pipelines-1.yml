@@ -68,8 +68,8 @@ steps:
     displayName: 'Run Tests'
     inputs:
       command: 'test'
-      projects: '**/*.IntegrationTests.csproj'
-      arguments: '--configuration Release --logger trx --results-directory $(Agent.TempDirectory)/TestResults'
+      projects: '/home/vsts/work/1/s/ProjectMongoDB.IntegrationTests/ProjectMongoDB.IntegrationTests.csproj'
+      arguments: '--logger trx --results-directory /home/vsts/work/_temp/TestResults --configuration Release --verbosity detailed'
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
