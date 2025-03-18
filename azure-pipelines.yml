@@ -50,7 +50,7 @@ steps:
     displayName: 'Run Tests'
     inputs:
       command: 'test'
-      projects: '**/*.IntegrationTests.csproj'  # Runs tests for all test projects
+      projects: 'ProjectMongoDB.IntegrationTests/ProjectMongoDB.IntegrationTests.csproj'  # Runs tests for all test projects
       arguments: '--logger trx --results-directory $(Agent.TempDirectory)/TestResults --configuration Release --verbosity detailed'
 
 
