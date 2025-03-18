@@ -51,7 +51,7 @@ steps:
     inputs:
       command: 'test'
       projects: '**/*.IntegrationTests.csproj'  # Runs tests for all test projects
-      arguments: '--configuration $(buildConfiguration) --logger trx --results-directory $(Agent.TempDirectory)/TestResults --verbosity detailed'
+      arguments: '--logger trx --results-directory $(Agent.TempDirectory)/TestResults --configuration Release --verbosity detailed'
 
 
 
