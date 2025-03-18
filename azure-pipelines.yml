@@ -39,18 +39,21 @@ steps:
 
   # **Wait for MongoDB to Start **
   - script: |
-      sleep 10  # Wait 10 seconds to make sure MongoDB is up
-    displayName: 'Wait for MongoDB to be Ready'
-
-  - script: |
-      nc -zv localhost 27017
-    displayName: 'Check MongoDB Connection'
+      for i in {1..30}; do # Try 30 times
+        nc -zv localhost 27017 && break
+        sleep 1
+      done
+      if [[ $i -eq 31 ]]; then
+        echo "Failed to connect to MongoDB after 30 attempts"
+        exit 1
+      fi
+    displayName: 'Check MongoDB Connection with Retry'
 
   - task: DotNetCoreCLI@2
     displayName: 'Run Tests'
     inputs:
       command: 'test'
-      projects: 'ProjectMongoDB.IntegrationTests/ProjectMongoDB.IntegrationTests.csproj'  # Runs tests for all test projects
+      projects: '/home/vsts/work/1/s/ProjectMongoDB.IntegrationTests/ProjectMongoDB.IntegrationTests.csproj' # Explicit path  # Runs tests for all test projects
       arguments: '--logger trx --results-directory $(Agent.TempDirectory)/TestResults --configuration Release --verbosity detailed'
 
 
