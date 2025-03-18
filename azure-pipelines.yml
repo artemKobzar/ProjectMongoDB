@@ -55,8 +55,8 @@ steps:
     displayName: 'Run Tests'
     inputs:
       command: 'test'
-      projects: '$(System.DefaultWorkingDirectory)/**/*.IntegrationTests.csproj'
-      arguments: '--logger trx --results-directory $(Agent.TempDirectory)/TestResults --configuration Release --verbosity detailed'
+      projects: 'ProjectMongoDB.IntegrationTests/ProjectMongoDB.IntegrationTests.csproj'
+      arguments: '--configuration $(buildConfiguration)'
 
 
 
