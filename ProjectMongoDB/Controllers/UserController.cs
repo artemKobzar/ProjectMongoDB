@@ -27,8 +27,8 @@ namespace ProjectMongoDB.Controllers
         [Authorize]
         public async Task<IActionResult> GetAll()
         {
-                var users = await _userRepository.GetAll();
-                return Ok(users);          
+            var users = await _userRepository.GetAll();
+            return Ok(users);          
         }
 
         [HttpGet("{id}")]

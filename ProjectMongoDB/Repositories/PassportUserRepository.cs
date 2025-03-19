@@ -13,10 +13,9 @@ namespace ProjectMongoDB.Repositories
         private readonly IOptions<DbSettings> _dbSettings;
         private readonly FilterDefinitionBuilder<PassportUser> filterBuilder = Builders<PassportUser>.Filter;
         private readonly FilterDefinitionBuilder<User> filterBuilderU = Builders<User>.Filter;
-        public PassportUserRepository(IOptions<DbSettings> dbSettings)
+        public PassportUserRepository(IMongoClient mongoClient, IOptions<DbSettings> dbSettings)
         {
             _dbSettings = dbSettings;
-            var mongoClient = new MongoClient(_dbSettings.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(_dbSettings.Value.DbName);
             _userCollection = mongoDatabase.GetCollection<User>
                 (_dbSettings.Value.UsersCollectionName);

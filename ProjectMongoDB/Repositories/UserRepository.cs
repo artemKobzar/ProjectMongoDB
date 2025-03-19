@@ -21,10 +21,10 @@ namespace ProjectMongoDB.Repositories
         private readonly IOptions<DbSettings> _dbSettings;
         private readonly FilterDefinitionBuilder<User> filterBuilder = Builders<User>.Filter;
         private readonly FilterDefinitionBuilder<PassportUser> filterBuilderPas = Builders<PassportUser>.Filter;
-        public UserRepository (IOptions<DbSettings> dbSettings)
+        public UserRepository (IMongoClient mongoClient, IOptions<DbSettings> dbSettings)
         {
             _dbSettings = dbSettings;
-            var mongoClient = new MongoClient(_dbSettings.Value.ConnectionString);
+            //var mongoClient = new MongoClient(_dbSettings.Value.ConnectionString);
             var mongoDatabase = mongoClient.GetDatabase(_dbSettings.Value.DbName);
             _userCollection = mongoDatabase.GetCollection<User>
                 (_dbSettings.Value.UsersCollectionName);
@@ -33,11 +33,27 @@ namespace ProjectMongoDB.Repositories
             _userImageCollection = mongoDatabase.GetCollection<UserImage>
                 (_dbSettings.Value.UsersImageCollectionName);
             _gridFSBucket = new GridFSBucket(mongoDatabase);
+
+            _gridFSBucket = new GridFSBucket(mongoDatabase);
         }
 
         public async Task<IEnumerable<User>> GetAll()
         {
-            return await _userCollection.Find(filterBuilder.Empty).ToListAsync();
+            Console.WriteLine("Executing FindAsync in UserRepository...");
+
+            // Check if collection is null
+            if (_userCollection == null)
+            {
+                Console.WriteLine("ERROR: _userCollection is NULL!");
+                return new List<User>();
+            }
+            Console.WriteLine($"Repository _userCollection: {_userCollection.GetHashCode()}");
+            var result = await _userCollection.FindAsync(_ => true);
+            var users = await result.ToListAsync();
+
+            Console.WriteLine($"Users retrieved: {users.Count}");
+            return users;
+            //return await _userCollection.Find(filterBuilder.Empty).ToListAsync();
         }
 
         public async Task<User> Get(string id)
