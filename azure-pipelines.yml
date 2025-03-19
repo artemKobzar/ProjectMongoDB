@@ -20,14 +20,8 @@ steps:
       version: '7.x'  # Specify the .NET SDK version compatible with your project
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
-  - task: NuGetCommand@2
-    displayName: 'Restore NuGet Packages'
-    inputs:
-      command: 'restore'
-      restoreSolution: 'ProjectMongoDB.sln'
-      feedsToUse: 'select'
-      noCache: true   # Forces fresh download
-      disableParallelProcessing: true  # Prevents weird dependency conflicts
+  - script: dotnet restore --ignore-failed-sources --verbosity detailed
+    displayName: 'Restore NuGet Packages (Debug Mode)'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build Solution'
@@ -36,21 +30,60 @@ steps:
       projects: '**/*.sln'  # Builds all solution files
       arguments: '--configuration $(buildConfiguration)'
 
+  # **Start MongoDB in Docker**
+  - script: |
+      docker run -d --name mongodb -p 27017:27017 mongo:latest
+    displayName: 'Start MongoDB in Docker'
+
+  - script: |
+      echo "Waiting for MongoDB to be fully ready..."
+      for i in {1..30}; do
+        nc -zv localhost 27017 && echo "MongoDB is up!" && exit 0
+        echo "Waiting..."
+        sleep 2
+      done
+      echo "MongoDB did not start in time" && exit 1
+    displayName: 'Wait for MongoDB (Improved)'
+
+  # **MongoDB Debugging**
+  - script: |
+      docker exec mongodb mongosh --eval "db.runCommand({ ping: 1 })"
+    displayName: 'Debug: MongoDB Ping Test'
+
+  - script: |
+      docker exec mongodb mongosh --eval "show dbs"
+      docker exec mongodb mongosh --eval "use testdb; show collections"
+    displayName: 'Debug: Check MongoDB State'
+
+  # **Debug: List All .csproj Files**
+  - script: find $(System.DefaultWorkingDirectory) -name "*.csproj"
+    displayName: 'Debug: List all .csproj files'
+    
+  - script: |
+      mkdir -p /home/vsts/work/1/s/ProjectMongoDB.IntegrationTests/wwwroot
+      cp /home/vsts/work/1/s/ProjectMongoDB.IntegrationTests/default.jpg /home/vsts/work/1/s/ProjectMongoDB.IntegrationTests/wwwroot/default.jpg
+    displayName: 'Create wwwroot and copy default image'
+
+  - script: |
+      echo "Verifying default image..."
+      ls -lah $(System.DefaultWorkingDirectory)/ProjectMongoDB.IntegrationTests/wwwroot/default.jpg
+    displayName: 'Debug: Check Default Image'
+
   - task: DotNetCoreCLI@2
     displayName: 'Run Tests'
     inputs:
       command: 'test'
-      projects: '**/*.IntegrationTests.csproj'  # Runs tests for all test projects
-      arguments: '--configuration $(buildConfiguration) --logger trx --results-directory $(Agent.TempDirectory)/TestResults'
-      failOnStandardError: true
+      projects: '**/ProjectMongoDB.IntegrationTests.csproj'
+      arguments: '--configuration $(buildConfiguration)'
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
     inputs:
       testResultsFormat: 'VSTest'
       testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
-      searchFolder: '$(Agent.TempDirectory)/TestResults'
-      testRunTitle: 'Test Results'
+      mergeTestResults: true
+      failTaskOnFailedTests: true
+
 
 
 
