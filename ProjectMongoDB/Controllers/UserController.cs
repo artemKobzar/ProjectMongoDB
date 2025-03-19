@@ -17,11 +17,13 @@ namespace ProjectMongoDB.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserImageRepository _userImageRepository;
+        private readonly IWebHostEnvironment _env;
 
-        public UserController(IUserRepository userRepository, IUserImageRepository userImageRepository)
+        public UserController(IUserRepository userRepository, IUserImageRepository userImageRepository, IWebHostEnvironment env)
         {
             _userRepository = userRepository;
             _userImageRepository = userImageRepository;
+            _env = env;
         }
         [HttpGet("/users")]
         [Authorize]
@@ -124,7 +126,8 @@ namespace ProjectMongoDB.Controllers
             if (imageName == "default.jpg")
             {
                 // Return the default image from wwwroot
-                var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "default.jpg");
+                //var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "default.jpg");
+                var defaultImagePath = Path.Combine(_env.WebRootPath, "default.jpg");
 
                 if (!System.IO.File.Exists(defaultImagePath))
                 {
