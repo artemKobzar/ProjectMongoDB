@@ -83,10 +83,10 @@ steps:
       failTaskOnFailedTests: true
 
   - task: DotNetCoreCLI@2
-    displayName: 'Publish Application'
+    displayName: 'Publish Backend Only'
     inputs:
       command: 'publish'
-      publishWebProjects: true
+      projects: '**/ProjectMongoDB.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
       zipAfterPublish: true
 
