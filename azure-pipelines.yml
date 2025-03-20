@@ -11,6 +11,9 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
+  azureServiceConnection: 'AzureServiceConnection'  # Use the name of your Azure Service Connection
+  appServiceName: 'Project-Mongo'  # Your Azure App Service name
+  resourceGroupName: 'RG2'  # Your Azure Resource Group
 
 steps:
   - task: UseDotNet@2
@@ -29,26 +32,6 @@ steps:
       command: 'build'
       projects: '**/*.sln'  # Builds all solution files
       arguments: '--configuration $(buildConfiguration)'
-
-  # **Start MongoDB in Docker**
-  - script: |
-      docker run -d --name mongodb -p 27017:27017 mongo:latest
-    displayName: 'Start MongoDB in Docker'
-
-  - script: |
-      echo "Waiting for MongoDB to be fully ready..."
-      for i in {1..30}; do
-        nc -zv localhost 27017 && echo "MongoDB is up!" && exit 0
-        echo "Waiting..."
-        sleep 2
-      done
-      echo "MongoDB did not start in time" && exit 1
-    displayName: 'Wait for MongoDB (Improved)'
-
-  # **MongoDB Debugging**
-  - script: |
-      docker exec mongodb mongosh --eval "db.runCommand({ ping: 1 })"
-    displayName: 'Debug: MongoDB Ping Test'
 
   - script: |
       docker exec mongodb mongosh --eval "show dbs"
@@ -78,6 +61,23 @@ steps:
       testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
       mergeTestResults: true
       failTaskOnFailedTests: true
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish Application'
+    inputs:
+      command: 'publish'
+      publishWebProjects: true
+      arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+      zipAfterPublish: true
+
+  - task: AzureWebApp@1
+    displayName: 'Deploy to Azure App Service'
+    inputs:
+      azureSubscription: $(azureServiceConnection)
+      appType: 'webApp'
+      appName: $(appServiceName)
+      package: $(Build.ArtifactStagingDirectory)/*.zip
+      deploymentMethod: 'runFromPackage'
 
 
 
