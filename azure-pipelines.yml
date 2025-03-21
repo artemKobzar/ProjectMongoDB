@@ -57,8 +57,8 @@ steps:
     displayName: 'Build Solution'
     inputs:
       command: 'build'
-      # projects: '**/*.sln'  # Builds all solution files
-      projects: 'ProjectMongoDB/ProjectMongoDB.csproj'  # Builds backend files
+      projects: '**/*.sln'  # Builds all solution files
+      # projects: 'ProjectMongoDB/ProjectMongoDB.csproj'  # Builds backend files
       arguments: '--configuration $(buildConfiguration)'
 
   - script: |
@@ -91,17 +91,22 @@ steps:
       failTaskOnFailedTests: true
 
   # **Modify appsettings.json for Blazor Client**
+  
   - task: PowerShell@2
-    displayName: 'Update appsettings.json in Blazor'
+    displayName: 'Find and Update appsettings.json'
     inputs:
       targetType: 'inline'
       script: |
-        $appSettingsPath = "$(System.DefaultWorkingDirectory)/ClientMongo/appsettings.json"
-        $json = Get-Content -Path $appSettingsPath | ConvertFrom-Json
-        $json.apiUrl = "$(backendApiUrl)"
-        $json.applicationUrl = "$(frontendUrl)"
-        $json.InteractiveServiceSettings.AuthorityUrl = "$(identityServerUrl)"
-        $json | ConvertTo-Json -Depth 10 | Set-Content -Path $appSettingsPath
+        $appSettingsPath = Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Recurse -Filter "appsettings.json" | Select-Object -ExpandProperty FullName
+        if ($appSettingsPath) {
+          Write-Host "Found appsettings.json at $appSettingsPath"
+          $json = Get-Content -Path $appSettingsPath | ConvertFrom-Json
+          $json.apiUrl = "https://project-mongo-client.azurewebsites.net"
+          $json | ConvertTo-Json -Depth 100 | Set-Content -Path $appSettingsPath
+        } else {
+          Write-Host "appsettings.json not found!"
+          exit 1
+        }
 
   # **Publish & Deploy Backend**
   - task: DotNetCoreCLI@2
@@ -109,7 +114,7 @@ steps:
     inputs:
       command: 'publish'
       projects: 'ProjectMongoDB/ProjectMongoDB.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish --verbosity detailed'
       zipAfterPublish: true
 
   - task: AzureWebApp@1
@@ -121,7 +126,41 @@ steps:
       package: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish/*.zip
       deploymentMethod: 'runFromPackage'
 
- 
+  # **Publish & Deploy Identity Server**
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish Identity Server'
+    inputs:
+      command: 'publish'
+      projects: 'DuendeIdentity/DuendeIdentity.csproj'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish --verbosity detailed'
+      zipAfterPublish: true
+
+  - task: AzureWebApp@1
+    displayName: 'Deploy Identity Server'
+    inputs:
+      azureSubscription: $(azureServiceConnection)
+      appType: 'webApp'
+      appName: $(identityAppService)
+      package: $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish/*.zip
+      deploymentMethod: 'runFromPackage'
+
+  # **Publish & Deploy Blazor Client**
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish Blazor Client'
+    inputs:
+      command: 'publish'
+      projects: 'ClientMongo/ClientMongo.csproj'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ClientMongo/publish --verbosity detailed'
+      zipAfterPublish: true
+
+  - task: AzureWebApp@1
+    displayName: 'Deploy Blazor Client'
+    inputs:
+      azureSubscription: $(azureServiceConnection)
+      appType: 'webApp'
+      appName: $(frontendAppService)
+      package: $(Build.ArtifactStagingDirectory)/ClientMongo/publish/*.zip
+      deploymentMethod: 'runFromPackage'
 
 
 
