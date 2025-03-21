@@ -97,16 +97,10 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $appSettingsPath = Get-ChildItem -Path $(System.DefaultWorkingDirectory) -Recurse -Filter "appsettings.json" | Select-Object -ExpandProperty FullName
-        if ($appSettingsPath) {
-          Write-Host "Found appsettings.json at $appSettingsPath"
-          $json = Get-Content -Path $appSettingsPath | ConvertFrom-Json
-          $json.apiUrl = "https://project-mongo-client.azurewebsites.net"
-          $json | ConvertTo-Json -Depth 100 | Set-Content -Path $appSettingsPath
-        } else {
-          Write-Host "appsettings.json not found!"
-          exit 1
-        }
+        $appSettingsPath = "/home/vsts/work/1/s/ClientMongo/appsettings.json" 
+        $jsonContent = Get-Content -Path $appSettingsPath -Raw | ConvertFrom-Json
+        $jsonContent.apiUrl = "https://project-mongo-client.azurewebsites.net"
+        $jsonContent | ConvertTo-Json -Depth 100 | Set-Content -Path $appSettingsPath
 
   # **Publish & Deploy Backend**
   - task: DotNetCoreCLI@2
