@@ -96,7 +96,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $appSettingsPath = "$(System.DefaultWorkingDirectory)/ProjectMongoClient/appsettings.json"
+        $appSettingsPath = "$(System.DefaultWorkingDirectory)/ClientMongo/appsettings.json"
         $json = Get-Content -Path $appSettingsPath | ConvertFrom-Json
         $json.apiUrl = "$(backendApiUrl)"
         $json.applicationUrl = "$(frontendUrl)"
@@ -144,7 +144,7 @@ steps:
     displayName: 'Publish Blazor Client'
     inputs:
       command: 'publish'
-      projects: 'ProjectMongoClient/ProjectMongoClient.csproj'
+      projects: 'ClientMongo/ClientMongo.csproj'
       arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/Client'
       zipAfterPublish: true
 
