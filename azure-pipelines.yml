@@ -102,6 +102,18 @@ steps:
         $jsonContent.apiUrl = "https://project-mongo-client.azurewebsites.net"
         $jsonContent | ConvertTo-Json -Depth 100 | Set-Content -Path $appSettingsPath
 
+  - task: DeleteFiles@1
+    displayName: 'Clean Build Artifacts'
+    inputs:
+      SourceFolder: '$(Build.ArtifactStagingDirectory)'
+      Contents: '**/*'
+
+  - script: |
+      echo "Backend Path: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish"
+      echo "Identity Server Path: $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish"
+      echo "Blazor Client Path: $(Build.ArtifactStagingDirectory)/ClientMongo/publish"
+    displayName: 'Check Build Paths'
+    
   # **Publish & Deploy Backend**
   - task: DotNetCoreCLI@2
     displayName: 'Publish Backend'
@@ -119,18 +131,6 @@ steps:
       appName: $(backendAppService)
       package: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish/*.zip
       deploymentMethod: 'runFromPackage'
-
-  - task: DeleteFiles@1
-    displayName: 'Clean Build Artifacts'
-    inputs:
-      SourceFolder: '$(Build.ArtifactStagingDirectory)'
-      Contents: '**/*'
-
-  - script: |
-      echo "Backend Path: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish"
-      echo "Identity Server Path: $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish"
-      echo "Blazor Client Path: $(Build.ArtifactStagingDirectory)/ClientMongo/publish"
-    displayName: 'Check Build Paths'
 
   # **Publish & Deploy Identity Server**
   - task: DotNetCoreCLI@2
