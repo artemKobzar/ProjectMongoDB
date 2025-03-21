@@ -120,6 +120,18 @@ steps:
       package: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish/*.zip
       deploymentMethod: 'runFromPackage'
 
+  - task: DeleteFiles@1
+    displayName: 'Clean Build Artifacts'
+    inputs:
+      SourceFolder: '$(Build.ArtifactStagingDirectory)'
+      Contents: '**/*'
+
+  - script: |
+      echo "Backend Path: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish"
+      echo "Identity Server Path: $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish"
+      echo "Blazor Client Path: $(Build.ArtifactStagingDirectory)/ClientMongo/publish"
+    displayName: 'Check Build Paths'
+
   # **Publish & Deploy Identity Server**
   - task: DotNetCoreCLI@2
     displayName: 'Publish Identity Server'
@@ -146,6 +158,7 @@ steps:
       projects: 'ClientMongo/ClientMongo.csproj'
       arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ClientMongo/publish --verbosity detailed'
       zipAfterPublish: true
+      workingDirectory: 'ClientMongo' # Ensures correct path resolution
 
   - task: AzureWebApp@1
     displayName: 'Deploy Blazor Client'
