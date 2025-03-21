@@ -91,17 +91,16 @@ steps:
       failTaskOnFailedTests: true
 
   # **Modify appsettings.json for Blazor Client**
+  
   - task: PowerShell@2
-    displayName: 'Update appsettings.json in Blazor'
+    displayName: 'Find and Update appsettings.json'
     inputs:
       targetType: 'inline'
       script: |
-        $appSettingsPath = "$(System.DefaultWorkingDirectory)/ProjectMongoClient/appsettings.json"
-        $json = Get-Content -Path $appSettingsPath | ConvertFrom-Json
-        $json.apiUrl = "$(backendApiUrl)"
-        $json.applicationUrl = "$(frontendUrl)"
-        $json.InteractiveServiceSettings.AuthorityUrl = "$(identityServerUrl)"
-        $json | ConvertTo-Json -Depth 10 | Set-Content -Path $appSettingsPath
+        $appSettingsPath = "/home/vsts/work/1/s/ClientMongo/appsettings.json" 
+        $jsonContent = Get-Content -Path $appSettingsPath -Raw | ConvertFrom-Json
+        $jsonContent.apiUrl = "https://project-mongo-client.azurewebsites.net"
+        $jsonContent | ConvertTo-Json -Depth 100 | Set-Content -Path $appSettingsPath
 
   # **Publish & Deploy Backend**
   - task: DotNetCoreCLI@2
@@ -109,7 +108,7 @@ steps:
     inputs:
       command: 'publish'
       projects: 'ProjectMongoDB/ProjectMongoDB.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/Backend'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish --verbosity detailed'
       zipAfterPublish: true
 
   - task: AzureWebApp@1
@@ -118,7 +117,7 @@ steps:
       azureSubscription: $(azureServiceConnection)
       appType: 'webApp'
       appName: $(backendAppService)
-      package: $(Build.ArtifactStagingDirectory)/Backend/*.zip
+      package: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish/*.zip
       deploymentMethod: 'runFromPackage'
 
   # **Publish & Deploy Identity Server**
@@ -126,8 +125,8 @@ steps:
     displayName: 'Publish Identity Server'
     inputs:
       command: 'publish'
-      projects: 'DuendeIdentityServer/DuendeIdentityServer.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/IdentityServer'
+      projects: 'DuendeIdentity/DuendeIdentity.csproj'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish --verbosity detailed'
       zipAfterPublish: true
 
   - task: AzureWebApp@1
@@ -136,7 +135,7 @@ steps:
       azureSubscription: $(azureServiceConnection)
       appType: 'webApp'
       appName: $(identityAppService)
-      package: $(Build.ArtifactStagingDirectory)/IdentityServer/*.zip
+      package: $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish/*.zip
       deploymentMethod: 'runFromPackage'
 
   # **Publish & Deploy Blazor Client**
@@ -144,8 +143,8 @@ steps:
     displayName: 'Publish Blazor Client'
     inputs:
       command: 'publish'
-      projects: 'ProjectMongoClient/ProjectMongoClient.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/Client'
+      projects: 'ClientMongo/ClientMongo.csproj'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ClientMongo/publish --verbosity detailed'
       zipAfterPublish: true
 
   - task: AzureWebApp@1
@@ -154,7 +153,7 @@ steps:
       azureSubscription: $(azureServiceConnection)
       appType: 'webApp'
       appName: $(frontendAppService)
-      package: $(Build.ArtifactStagingDirectory)/Client/*.zip
+      package: $(Build.ArtifactStagingDirectory)/ClientMongo/publish/*.zip
       deploymentMethod: 'runFromPackage'
 
 
