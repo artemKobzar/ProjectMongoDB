@@ -57,8 +57,8 @@ steps:
     displayName: 'Build Solution'
     inputs:
       command: 'build'
-      projects: '**/*.sln'  # Builds all solution files
-      # projects: 'ProjectMongoDB/ProjectMongoDB.csproj'  # Builds backend files
+      # projects: '**/*.sln'  # Builds all solution files
+      projects: 'ProjectMongoDB/ProjectMongoDB.csproj'  # Builds backend files
       arguments: '--configuration $(buildConfiguration)'
 
   - script: |
@@ -121,41 +121,7 @@ steps:
       package: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish/*.zip
       deploymentMethod: 'runFromPackage'
 
-  # **Publish & Deploy Identity Server**
-  - task: DotNetCoreCLI@2
-    displayName: 'Publish Identity Server'
-    inputs:
-      command: 'publish'
-      projects: 'DuendeIdentity/DuendeIdentity.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish'
-      zipAfterPublish: true
-
-  - task: AzureWebApp@1
-    displayName: 'Deploy Identity Server'
-    inputs:
-      azureSubscription: $(azureServiceConnection)
-      appType: 'webApp'
-      appName: $(identityAppService)
-      package: $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish/*.zip
-      deploymentMethod: 'runFromPackage'
-
-  # **Publish & Deploy Blazor Client**
-  - task: DotNetCoreCLI@2
-    displayName: 'Publish Blazor Client'
-    inputs:
-      command: 'publish'
-      projects: 'ClientMongo/ClientMongo.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ClientMongo/publish'
-      zipAfterPublish: true
-
-  - task: AzureWebApp@1
-    displayName: 'Deploy Blazor Client'
-    inputs:
-      azureSubscription: $(azureServiceConnection)
-      appType: 'webApp'
-      appName: $(frontendAppService)
-      package: $(Build.ArtifactStagingDirectory)/ClientMongo/publish/*.zip
-      deploymentMethod: 'runFromPackage'
+ 
 
 
 
