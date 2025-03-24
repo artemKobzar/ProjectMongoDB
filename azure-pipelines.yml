@@ -130,7 +130,7 @@ steps:
       azureSubscription: $(azureServiceConnection)
       appType: 'webApp'
       appName: $(backendAppService)
-      package: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish/*.zip
+      package: $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish/ProjectMongoDB.zip
       deploymentMethod: 'runFromPackage'
 
   # **Publish & Deploy Identity Server**
@@ -148,7 +148,7 @@ steps:
       azureSubscription: $(azureServiceConnection)
       appType: 'webApp'
       appName: $(identityAppService)
-      package: $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish/*.zip
+      package: $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish/DuendeIdentity.zip
       deploymentMethod: 'runFromPackage'
 
   # **Publish & Deploy Blazor Client**
@@ -167,7 +167,7 @@ steps:
       azureSubscription: $(azureServiceConnection)
       appType: 'webApp'
       appName: $(frontendAppService)
-      package: $(Build.ArtifactStagingDirectory)/ClientMongo/publish/*.zip
+      package: $(Build.ArtifactStagingDirectory)/ClientMongo/publish/ClientMongo.zip
       deploymentMethod: 'runFromPackage'
 
   - task: CmdLine@2
