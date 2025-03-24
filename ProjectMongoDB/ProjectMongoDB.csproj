@@ -5,7 +5,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
+  <ItemGroup>
+	<None Update="appsettings.json">
+		<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+	</None>
+	<None Update="appsettings.Development.json">
+		<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+	</None>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
