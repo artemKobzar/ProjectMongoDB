@@ -97,7 +97,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $appSettingsPath = "$(System.DefaultWorkingDirectory)/MongoClient/appsettings.json" 
+        $appSettingsPath = "$(System.DefaultWorkingDirectory)/ClientMongo/appsettings.json" 
         $jsonContent = Get-Content -Path $appSettingsPath -Raw | ConvertFrom-Json
         $jsonContent.apiUrl = "$(backendApiUrl)"
         $jsonContent.applicationUrl = "$(frontendUrl)"
