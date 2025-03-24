@@ -4,16 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  <ItemGroup>
-	<None Update="appsettings.json">
-		<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		<CopyToPublishDirectory>Never</CopyToPublishDirectory>
-	</None>
-	<None Update="appsettings.Development.json">
-		<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		<CopyToPublishDirectory>Never</CopyToPublishDirectory>
-	</None>
-  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="IdentityModel" Version="6.2.0" />

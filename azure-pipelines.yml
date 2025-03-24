@@ -97,9 +97,11 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $appSettingsPath = "/home/vsts/work/1/s/ClientMongo/appsettings.json" 
+        $appSettingsPath = "$(System.DefaultWorkingDirectory)/MongoClient/appsettings.json" 
         $jsonContent = Get-Content -Path $appSettingsPath -Raw | ConvertFrom-Json
-        $jsonContent.apiUrl = "https://project-mongo-client.azurewebsites.net"
+        $jsonContent.apiUrl = "$(backendApiUrl)"
+        $jsonContent.applicationUrl = "$(frontendUrl)"
+        $json.InteractiveServiceSettings.AuthorityUrl = "$(identityServerUrl)"
         $jsonContent | ConvertTo-Json -Depth 100 | Set-Content -Path $appSettingsPath
 
   - task: DeleteFiles@1
@@ -122,12 +124,6 @@ steps:
       projects: 'ProjectMongoDB/ProjectMongoDB.csproj'
       arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish'
       zipAfterPublish: true
-
-  - task: CmdLine@2
-    displayName: 'Check Published Files for Backend'
-    condition: always()
-    inputs:
-      script: 'ls -R $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish'
 
   - task: AzureWebApp@1
     displayName: 'Deploy Backend'
@@ -174,6 +170,12 @@ steps:
       appName: $(frontendAppService)
       package: $(Build.ArtifactStagingDirectory)/ClientMongo/publish/*.zip
       deploymentMethod: 'runFromPackage'
+
+  - task: CmdLine@2
+    displayName: 'Check Published Files for Backend'
+    condition: always()
+    inputs:
+      script: 'ls -R $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish'
 
 
 
