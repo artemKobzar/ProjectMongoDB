@@ -120,7 +120,7 @@ steps:
     inputs:
       command: 'publish'
       projects: 'ProjectMongoDB/ProjectMongoDB.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish --no-build --property:ExcludeFilesFromPublish=appsettings.json,appsettings.Development.json'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish'
       zipAfterPublish: true
 
   - task: CmdLine@2
@@ -144,7 +144,7 @@ steps:
     inputs:
       command: 'publish'
       projects: 'DuendeIdentity/DuendeIdentity.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish --no-build --property:ExcludeFilesFromPublish=appsettings.json,appsettings.Development.json'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish'
       zipAfterPublish: true
 
   - task: AzureWebApp@1
@@ -162,7 +162,7 @@ steps:
     inputs:
       command: 'publish'
       projects: 'ClientMongo/ClientMongo.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ClientMongo/publish --no-build --property:ExcludeFilesFromPublish=appsettings.json,appsettings.Development.json'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ClientMongo/publish'
       zipAfterPublish: true
       workingDirectory: 'ClientMongo' # Ensures correct path resolution
 
