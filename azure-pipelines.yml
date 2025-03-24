@@ -98,11 +98,11 @@ steps:
       targetType: 'inline'
       script: |
         $appSettingsPath = "$(System.DefaultWorkingDirectory)/ClientMongo/appsettings.json" 
-        $jsonContent = Get-Content -Path $appSettingsPath -Raw | ConvertFrom-Json
-        $jsonContent.apiUrl = "$(backendApiUrl)"
-        $jsonContent.applicationUrl = "$(frontendUrl)"
+        $json = Get-Content -Path $appSettingsPath -Raw | ConvertFrom-Json
+        $json.apiUrl = "$(backendApiUrl)"
+        $json.applicationUrl = "$(frontendUrl)"
         $json.InteractiveServiceSettings.AuthorityUrl = "$(identityServerUrl)"
-        $jsonContent | ConvertTo-Json -Depth 100 | Set-Content -Path $appSettingsPath
+        $json | ConvertTo-Json -Depth 100 | Set-Content -Path $appSettingsPath
 
   - task: DeleteFiles@1
     displayName: 'Clean Build Artifacts'
