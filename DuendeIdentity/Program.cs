@@ -13,6 +13,7 @@ namespace DuendeIdentity
             //var seed = args.Contains("/seed");
             //args = args.Except(new[] { "/seed" }).ToArray();
             var builder = WebApplication.CreateBuilder(args);
+            builder.Configuration.AddJsonFile("appsettings.DuendeIdentity.json", optional: false, reloadOnChange: true);
             //SeedData.EnsureSeedData(builder.Configuration.GetConnectionString("SQLDuendeConnectionIdentity"));
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.ConfigureIdentityServices(builder.Configuration);

@@ -13,7 +13,12 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Net.Http.Json" Version="7.0.0" />
   </ItemGroup>
-
+	
+  <ItemGroup>
+	<None Remove="..\ProjectMongoDB\appsettings.json" />
+	<None Remove="..\ProjectMongoDB\appsettings.Development.json" />
+  </ItemGroup>
+	
   <ItemGroup>
     <ProjectReference Include="..\ProjectMongoDB\ProjectMongoDB.csproj" />
   </ItemGroup>

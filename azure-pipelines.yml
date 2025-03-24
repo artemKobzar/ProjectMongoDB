@@ -58,7 +58,6 @@ steps:
     inputs:
       command: 'build'
       projects: '**/*.sln'  # Builds all solution files
-      # projects: 'ProjectMongoDB/ProjectMongoDB.csproj'  # Builds backend files
       arguments: '--configuration $(buildConfiguration)'
 
   - script: |
@@ -97,7 +96,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $appSettingsPath = "$(System.DefaultWorkingDirectory)/ClientMongo/appsettings.json" 
+        $appSettingsPath = "$(System.DefaultWorkingDirectory)/ClientMongo/appsettings.ClientMongo.json" 
         $json = Get-Content -Path $appSettingsPath -Raw | ConvertFrom-Json
         $json.apiUrl = "$(backendApiUrl)"
         $json.applicationUrl = "$(frontendUrl)"
