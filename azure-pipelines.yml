@@ -120,8 +120,14 @@ steps:
     inputs:
       command: 'publish'
       projects: 'ProjectMongoDB/ProjectMongoDB.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish --verbosity detailed'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish --no-build --property:ExcludeFilesFromPublish=appsettings.json;appsettings.Development.json'
       zipAfterPublish: true
+
+  - task: CmdLine@2
+    displayName: 'Check Published Files for Backend'
+    condition: always()
+    inputs:
+      script: 'ls -R $(Build.ArtifactStagingDirectory)/ProjectMongoDB/publish'
 
   - task: AzureWebApp@1
     displayName: 'Deploy Backend'
@@ -138,7 +144,7 @@ steps:
     inputs:
       command: 'publish'
       projects: 'DuendeIdentity/DuendeIdentity.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish --verbosity detailed'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/DuendeIdentity/publish --no-build --property:ExcludeFilesFromPublish=appsettings.json;appsettings.Development.json'
       zipAfterPublish: true
 
   - task: AzureWebApp@1
@@ -156,7 +162,7 @@ steps:
     inputs:
       command: 'publish'
       projects: 'ClientMongo/ClientMongo.csproj'
-      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ClientMongo/publish --verbosity detailed'
+      arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/ClientMongo/publish --no-build --property:ExcludeFilesFromPublish=appsettings.json;appsettings.Development.json'
       zipAfterPublish: true
       workingDirectory: 'ClientMongo' # Ensures correct path resolution
 
