@@ -7,9 +7,11 @@
   </PropertyGroup>
   <ItemGroup>
 	<None Update="appsettings.json">
+		<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		<CopyToPublishDirectory>Never</CopyToPublishDirectory>
 	</None>
 	<None Update="appsettings.Development.json">
+		<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		<CopyToPublishDirectory>Never</CopyToPublishDirectory>
 	</None>
   </ItemGroup>
