@@ -1,8 +1,12 @@
 using DuendeIdentity.Models;
 using Duende.IdentityServer.Services;
+using Azure.Identity;
+using Azure.Security.KeyVault.Certificates;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DuendeIdentity
 {
@@ -14,6 +18,17 @@ namespace DuendeIdentity
             //args = args.Except(new[] { "/seed" }).ToArray();
             var builder = WebApplication.CreateBuilder(args);
             builder.Configuration.AddJsonFile("appsettings.DuendeIdentity.json", optional: false, reloadOnChange: true);
+
+            // Load the certificate from Azure Key Vault
+            var keyVaultUrl = builder.Configuration["AzureKeyVault:Url"];
+            var credential = new DefaultAzureCredential();
+            var certificateClient = new CertificateClient(new Uri(keyVaultUrl), credential);
+
+            var certificateName = "DuendeSigningCertificate"; // The name used in Key Vault
+            var certificate = certificateClient.GetCertificate(certificateName);
+
+            var signingCertificate = new X509Certificate2(certificate.Value.Cer);
+
             //SeedData.EnsureSeedData(builder.Configuration.GetConnectionString("SQLDuendeConnectionIdentity"));
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.ConfigureIdentityServices(builder.Configuration);
@@ -37,7 +52,7 @@ namespace DuendeIdentity
                    opt.ConfigureDbContext = o => o.UseSqlServer(builder.Configuration.GetConnectionString("SQLDuendeConnectionIdentity"),
                    sql => sql.MigrationsAssembly(typeof(Program).GetTypeInfo().Assembly.GetName().Name));
                 })               
-                .AddDeveloperSigningCredential().AddProfileService<ProfileService>();
+                .AddSigningCredential(signingCertificate).AddProfileService<ProfileService>();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 

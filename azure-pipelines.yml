@@ -16,6 +16,8 @@ variables:
   identityAppService: 'project-mongo-duendeidentity'
   frontendAppService: 'project-mongo-client'
   resourceGroupName: 'RG2'
+  keyVaultName: 'duende-identity-keyvault'
+  certName: 'DuendeSigningCertificate'
 
   # Correct Azure URLs
   backendApiUrl: 'https://project-mongo-cccadrfrf9gwdfh6.canadacentral-01.azurewebsites.net'
@@ -29,6 +31,12 @@ steps:
       packageType: 'sdk'
       version: '7.x'  # Specify the .NET SDK version compatible with your project
       installationPath: $(Agent.ToolsDirectory)/dotnet
+
+  - task: AzureKeyVault@2
+    inputs:
+      azureSubscription: $(azureServiceConnection)
+      KeyVaultName: $(keyVaultName)
+      SecretsFilter: '*'
 
       # **Start MongoDB in Docker**
   - script: |
