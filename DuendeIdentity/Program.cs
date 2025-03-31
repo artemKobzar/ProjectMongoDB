@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
+using Azure.Security.KeyVault.Secrets;
 
 namespace DuendeIdentity
 {
@@ -28,6 +29,10 @@ namespace DuendeIdentity
             var certificate = certificateClient.GetCertificate(certificateName);
 
             var signingCertificate = new X509Certificate2(certificate.Value.Cer);
+            // Load certificate from file
+            //var signingCertPath = builder.Configuration["SigningCertificate:Path"];
+            //var signingCertPassword = builder.Configuration["SigningCertificate:Password"];
+            //var signingCertificate = new X509Certificate2(signingCertPath, signingCertPassword);
 
             //SeedData.EnsureSeedData(builder.Configuration.GetConnectionString("SQLDuendeConnectionIdentity"));
             builder.Services.AddScoped<IProfileService, ProfileService>();
