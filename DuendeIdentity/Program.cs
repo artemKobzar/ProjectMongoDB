@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
 using Azure.Security.KeyVault.Secrets;
+using System.Security;
 
 namespace DuendeIdentity
 {
@@ -23,12 +24,15 @@ namespace DuendeIdentity
             // Load the certificate from Azure Key Vault
             var keyVaultUrl = builder.Configuration["AzureKeyVault:Url"];
             var credential = new DefaultAzureCredential();
-            var certificateClient = new CertificateClient(new Uri(keyVaultUrl), credential);
+            //var certificateClient = new CertificateClient(new Uri(keyVaultUrl), credential);
+            var certificateClient = new SecretClient(new Uri(keyVaultUrl), credential);
 
             var certificateName = "DuendeSigningCertificate"; // The name used in Key Vault
-            var certificate = certificateClient.GetCertificate(certificateName);
-
-            var signingCertificate = new X509Certificate2(certificate.Value.Cer);
+            //var certificate = certificateClient.GetCertificate(certificateName);
+            var secret = certificateClient.GetSecret(certificateName);
+            var pfxBytes = Convert.FromBase64String(secret.Value.Value);
+            //var signingCertificate = new X509Certificate2(certificate.Value.Cer, securePassword);
+            var signingCertificate = new X509Certificate2(pfxBytes, (string?)null, X509KeyStorageFlags.MachineKeySet);
             // Load certificate from file
             //var signingCertPath = builder.Configuration["SigningCertificate:Path"];
             //var signingCertPassword = builder.Configuration["SigningCertificate:Password"];
