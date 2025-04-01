@@ -20,23 +20,49 @@ namespace DuendeIdentity
             //args = args.Except(new[] { "/seed" }).ToArray();
             var builder = WebApplication.CreateBuilder(args);
             builder.Configuration.AddJsonFile("appsettings.DuendeIdentity.json", optional: false, reloadOnChange: true);
+            // Create Logger
+            using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            var logger = loggerFactory.CreateLogger<Program>();
+            X509Certificate2 signingCertificate = null; 
+            try
+            {
+                logger.LogInformation("Starting certificate retrieval from Azure Key Vault...");
+                // Load the certificate from Azure Key Vault
+                var keyVaultUrl = builder.Configuration["AzureKeyVault:Url"];
+                var certificateName = builder.Configuration["AzureKeyVault:CertificateName"]; // The name used in Key Vault
+                if (string.IsNullOrEmpty(keyVaultUrl) || string.IsNullOrEmpty(certificateName))
+                {
+                    logger.LogError("Key Vault URL or Certificate Name is missing from configuration.");
+                    throw new InvalidOperationException("Azure Key Vault configuration is missing.");
+                }
+                logger.LogInformation($"Connecting to Key Vault: {keyVaultUrl}");
 
-            // Load the certificate from Azure Key Vault
-            var keyVaultUrl = builder.Configuration["AzureKeyVault:Url"];
-            var credential = new DefaultAzureCredential();
-            //var certificateClient = new CertificateClient(new Uri(keyVaultUrl), credential);
-            var certificateClient = new SecretClient(new Uri(keyVaultUrl), credential);
+                // Authenticate with Azure Key Vault
+                var credential = new DefaultAzureCredential();
+                var secretClient = new SecretClient(new Uri(keyVaultUrl), credential);
 
-            var certificateName = "DuendeSigningCertificate"; // The name used in Key Vault
-            //var certificate = certificateClient.GetCertificate(certificateName);
-            var secret = certificateClient.GetSecret(certificateName);
-            var pfxBytes = Convert.FromBase64String(secret.Value.Value);
-            //var signingCertificate = new X509Certificate2(certificate.Value.Cer, securePassword);
-            var signingCertificate = new X509Certificate2(pfxBytes, (string?)null, X509KeyStorageFlags.MachineKeySet);
-            // Load certificate from file
-            //var signingCertPath = builder.Configuration["SigningCertificate:Path"];
-            //var signingCertPassword = builder.Configuration["SigningCertificate:Password"];
-            //var signingCertificate = new X509Certificate2(signingCertPath, signingCertPassword);
+                logger.LogInformation($"Fetching certificate: {certificateName}");
+                var secret = secretClient.GetSecret(certificateName);
+
+                if (secret.Value == null || string.IsNullOrEmpty(secret.Value.Value))
+                {
+                    logger.LogError($"Certificate {certificateName} not found in Key Vault.");
+                    throw new InvalidOperationException($"Certificate {certificateName} is missing or empty.");
+                }
+                logger.LogInformation("Certificate successfully retrieved from Key Vault.");
+
+                // Convert Base64 to Byte Array
+                var pfxBytes = Convert.FromBase64String(secret.Value.Value);
+                logger.LogInformation("Certificate successfully converted from Base64.");
+                signingCertificate = new X509Certificate2(pfxBytes, (string?)null, X509KeyStorageFlags.MachineKeySet);
+
+                logger.LogInformation($"Certificate loaded successfully. Subject: {signingCertificate.Subject}");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Error retrieving the certificate: {ex.Message}");
+                throw; // Re-throw the exception so the app fails fast if critical
+            }
 
             //SeedData.EnsureSeedData(builder.Configuration.GetConnectionString("SQLDuendeConnectionIdentity"));
             builder.Services.AddScoped<IProfileService, ProfileService>();
@@ -91,3 +117,8 @@ namespace DuendeIdentity
         }
     }
 }
+
+// Load certificate from file
+//var signingCertPath = builder.Configuration["SigningCertificate:Path"];
+//var signingCertPassword = builder.Configuration["SigningCertificate:Password"];
+//var signingCertificate = new X509Certificate2(signingCertPath, signingCertPassword);
