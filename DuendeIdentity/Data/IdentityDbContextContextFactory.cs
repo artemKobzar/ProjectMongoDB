@@ -9,7 +9,7 @@ namespace DuendeIdentity.Data
         {
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.DuendeIdentity.json")
                 .Build();
             var builder = new DbContextOptionsBuilder<MongoDDuendeIdentityDbContext>();
             var connectionString = configuration.GetConnectionString("SQLDuendeConnectionIdentity");
