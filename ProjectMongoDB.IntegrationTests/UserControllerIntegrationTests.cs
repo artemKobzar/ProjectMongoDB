@@ -30,7 +30,7 @@ namespace ProjectMongoDB.IntegrationTests
             _client = factory.CreateClient();
 
             // Set up MongoDB client for the integration test (adjust the connection string as needed)
-            var mongoClient = new MongoClient("mongodb://localhost:27017"); // Ensure MongoDB is running locally
+            var mongoClient = new MongoClient("mongodb+srv://Artem:BvWiREdlRiXdK8@project-mongo-cosmosdb.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"); // Ensure MongoDB is running locally
             var database = mongoClient.GetDatabase("TestDatabase");
             _userCollection = database.GetCollection<User>("Users");
             _passportUserCollection = database.GetCollection<PassportUser>("PassportUsers");

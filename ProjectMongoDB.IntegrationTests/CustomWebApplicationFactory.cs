@@ -36,7 +36,7 @@ namespace ProjectMongoDB.IntegrationTests
                 // Replace with test database configuration
                 services.Configure<DbSettings>(options =>
                 {
-                    options.ConnectionString = "mongodb://localhost:27017";
+                    options.ConnectionString = "mongodb+srv://Artem:BvWiREdlRiXdK8@project-mongo-cosmosdb.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000";
                     options.DbName = "TestDatabase";  // Use the test database
                     options.UsersCollectionName = "Users";
                     options.PassportUsersCollectionName = "PassportUsers";
