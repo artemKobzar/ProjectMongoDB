@@ -50,7 +50,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuthentication()
     .AddJwtBearer(options =>
     {
-        options.Authority = "https://localhost:7353";
+        options.Authority = builder.Configuration["Jwt:Authority"];
         options.TokenValidationParameters.ValidateAudience = false;
     });
 builder.Services.AddAuthorization(options =>
@@ -74,14 +74,11 @@ app.UseAuthorization();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger UI");
-        //options.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
-        //options.OAuthClientId("project-test-api");
-        //options.OAuthClientSecret("secret");
-        //options.OAuthUsePkce();
     });
 }
 

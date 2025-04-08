@@ -14,6 +14,7 @@ namespace ProjectMongoDB.Repositories
 {
     public class UserRepository: IUserRepository
     {
+        private readonly ILogger<UserRepository> _logger;
         private readonly GridFSBucket _gridFSBucket;
         private readonly IMongoCollection<User> _userCollection;
         private readonly IMongoCollection<PassportUser> _passportUserCollection;
@@ -21,7 +22,7 @@ namespace ProjectMongoDB.Repositories
         private readonly IOptions<DbSettings> _dbSettings;
         private readonly FilterDefinitionBuilder<User> filterBuilder = Builders<User>.Filter;
         private readonly FilterDefinitionBuilder<PassportUser> filterBuilderPas = Builders<PassportUser>.Filter;
-        public UserRepository (IMongoClient mongoClient, IOptions<DbSettings> dbSettings)
+        public UserRepository(IMongoClient mongoClient, IOptions<DbSettings> dbSettings, ILogger<UserRepository> logger)
         {
             _dbSettings = dbSettings;
             //var mongoClient = new MongoClient(_dbSettings.Value.ConnectionString);
@@ -35,6 +36,7 @@ namespace ProjectMongoDB.Repositories
             _gridFSBucket = new GridFSBucket(mongoDatabase);
 
             _gridFSBucket = new GridFSBucket(mongoDatabase);
+            _logger = logger;
         }
 
         public async Task<IEnumerable<User>> GetAll()
@@ -44,15 +46,26 @@ namespace ProjectMongoDB.Repositories
             // Check if collection is null
             if (_userCollection == null)
             {
+                _logger.LogError("UserCollection is NULL! Check if MongoClient and DbName are correctly configured.");
                 Console.WriteLine("ERROR: _userCollection is NULL!");
                 return new List<User>();
             }
-            Console.WriteLine($"Repository _userCollection: {_userCollection.GetHashCode()}");
-            var result = await _userCollection.FindAsync(_ => true);
-            var users = await result.ToListAsync();
+            try
+            {
+                _logger.LogInformation("Calling FindAsync on _userCollection...");
+                Console.WriteLine($"Repository _userCollection: {_userCollection.GetHashCode()}");
+                var result = await _userCollection.FindAsync(_ => true);
+                var users = await result.ToListAsync();
 
-            Console.WriteLine($"Users retrieved: {users.Count}");
-            return users;
+                Console.WriteLine($"Users retrieved: {users.Count}");
+                _logger.LogInformation($"Users retrieved: {users.Count}");
+                return users;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while retrieving users.");
+                throw; 
+            }
             //return await _userCollection.Find(filterBuilder.Empty).ToListAsync();
         }
 

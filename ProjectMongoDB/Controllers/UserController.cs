@@ -18,19 +18,30 @@ namespace ProjectMongoDB.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IUserImageRepository _userImageRepository;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserRepository userRepository, IUserImageRepository userImageRepository, IWebHostEnvironment env)
+        public UserController(IUserRepository userRepository, IUserImageRepository userImageRepository, IWebHostEnvironment env, ILogger<UserController> logger)
         {
             _userRepository = userRepository;
             _userImageRepository = userImageRepository;
             _env = env;
+            _logger = logger;
         }
         [HttpGet("/users")]
         [Authorize]
         public async Task<IActionResult> GetAll()
         {
-            var users = await _userRepository.GetAll();
-            return Ok(users);          
+            try
+            {
+                var users = await _userRepository.GetAll();
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get users");
+                return StatusCode(500, "Server Error: Failed to get users");
+            }
+
         }
 
         [HttpGet("{id}")]

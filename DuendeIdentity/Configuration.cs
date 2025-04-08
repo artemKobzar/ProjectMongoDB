@@ -55,7 +55,7 @@ namespace DuendeIdentity
                     AllowedGrantTypes = GrantTypes.Code,
                     RequireClientSecret = false,
                     AllowedCorsOrigins = {"https://localhost:7153"},
-                    RedirectUris = { "https://localhost:7153/signin-oidc" },
+                    RedirectUris = new List<string>{ "https://localhost:7153/signin-oidc","https://oauth.pstmn.io/v1/browser-callback" },
                     PostLogoutRedirectUris = { "https://localhost:7153/signout-callback-oidc" },
                     RequirePkce = true,
                     RequireConsent = true,
