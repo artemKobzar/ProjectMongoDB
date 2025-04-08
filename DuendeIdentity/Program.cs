@@ -117,8 +117,3 @@ namespace DuendeIdentity
         }
     }
 }
-
-// Load certificate from file
-//var signingCertPath = builder.Configuration["SigningCertificate:Path"];
-//var signingCertPassword = builder.Configuration["SigningCertificate:Password"];
-//var signingCertificate = new X509Certificate2(signingCertPath, signingCertPassword);

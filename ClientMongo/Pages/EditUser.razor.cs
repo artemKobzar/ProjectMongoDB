@@ -131,18 +131,3 @@ namespace ClientMongo.Pages
         }
     }
 }
-
-//var user = await HttpClient.GetAsync($"{Config["apiUrl"]}/UserWithPassport/{Id}");
-//var user = await HttpClient.GetFromJsonAsync<User>($"{Config["apiUrl"]}/UserWithPassport/{Id}");
-
-
-//CurrentUser = await user.Content.ReadFromJsonAsync<User>();
-//CurrentUser = JsonConvert.DeserializeObject<User>(Convert.ToString(user.Content));
-
-//if (!editContext.Validate())
-//{
-//    Console.WriteLine("Validation failed! Stopping form submission.");
-//    errorMessage = "Validation failed! Please check the form.";
-//    StateHasChanged();  // ✅ Ensure UI updates
-//    return;  // 🚨 Prevent navigation
-//}
